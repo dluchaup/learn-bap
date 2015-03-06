@@ -24,6 +24,12 @@ module Callgraph = struct
         Seq.iter ~f:(fun (_mem, insn) ->
             Bil.iter (object inherit [unit] Bil.visitor
                 
+                method!enter_int addr () = if in_jmp then
+                    match Table.find_addr t.symbols addr with
+                    | None -> ()
+                    | Some (mem, dst) ->
+                      if Addr.(Memory.min_addr mem = addr) then f(src,dst)
+                  
             end) (Insn.bil insn)))
                                
     
