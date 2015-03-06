@@ -18,7 +18,15 @@ module Callgraph = struct
   (* let iter_vertex _ _ = () *)
   let iter_vertex f t = Table.iter t.symbols ~f
                         
-  let iter_edges_e  _ _ = ()
+  let iter_edges_e  f t =
+    Table.iteri t.symbols ~f:(fun mem src ->
+        Disasm.insns_at_mem t.program mem |>
+        Seq.iter ~f:(fun (_mem, insn) ->
+            Bil.iter (object inherit [unit] Bil.visitor
+                
+            end) (Insn.bil insn)))
+                               
+    
   let vertex_name v =
     let quote = sprintf "%S" in
     quote v
