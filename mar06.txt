@@ -1,0 +1,135 @@
+1. Install Bap
+2. Setup Env
+3. Call graph
+4. Assignment (mar 14)
+
+
+need opam 1.2
+
+$ sudo ad-apt-repository ppa:avsm/ppa
+$ sudo apt-get update
+$ sudo apt-get install opam
+$ opam init --amp=4.02.1
+$ eval ` opam config env `
+$ sudo apt-get install `opam install bap -e ubuntu `
+ (* opam install `opam install bap -e ubuntu `
+ (which version? opam show bap)
+$ opam install bap
+
+
+
+Install BAP
+opam.ocaml.org
+GIT=github.com/BinaryAnalyzisPlatform/bap.git
+                                 /opam-repository.git
+				 
+ opam pin add bap git://$GIT
+ opam pin add bap git://$GIT#newfeature
+ opam upgrade bap
+
+ To get rid of ...?
+ opam pin remove bap
+ 
+-------------------------------------------------------------------------------
+2. Setup Env/emacs
+What we need:
+ tuareg
+ merlin
+ ocp-indent
+ auto-complete (used by tuareg for autocompletion)
+
+Install:
+ opam install tuareg merlin ocp-indent
+ 
+See https://github.com/BinaryAnalysisPlatform/bap/wiki/Emacs
+  (att to .emacs ...)
+  M-x package-list-packages   (I X enter)...
+  copy ocaml.el
+ ... and load with (require `ocaml)
+  
+ 
+bap-byteweight update
+
+bap-objdump /bin/ls --use-ida
+bap-objdump /bin/ls --use-ida=idal64
+bap-objdump /bin/ls --use-ida -pname
+
+
+? bap-objdump uses .pdb from ida???
+
+///////////////////////////////////////////////////////////////////////////////
+Create a plugin:
+mkdir callgraph
+emacs callgraph/callgraph.ml
+
+C-c C-x ==> should see 3 errors because merling doen't know about bap
+
+ocamlfind list ==> which library exists
+
+
+
+...
+with the new plugin ...
+
+$ bapbuild callgraph.plugin
+$ bap-objdump /bin/ls -lcallgraph  [ -lcallgraph ... can have several]
+(bap-byteweight update)
+
+Look at:  ~/.opam/mar06/lib/ocamlgraph/graphviz.mli
+
+.... calgraph version:
+bapbuild -pkg ocamlgraph callgraph.plugin
+
+MISC:
+ Insn.bil msn -> bil
+
+
+Assignment:
+TBD [march 12]:
+
+call stringe for each function
+call forest for whole file
+
+NOTE:
+because I had opam already pinned, I initially got the wrong version
+of bap. Had to pin again and install. For future:
+ - opam pin
+ - opam pin remove 
+ I did: opam pin remove bap
+>>>>>>>>>>>>>
+dan@xubuntu2:~/learn/bap/callgraph$ opam pin remove bap
+bap is now unpinned from git git://github.com/BinaryAnalysisPlatform/bap
+bap needs to be reinstalled.
+The following actions will be performed:
+ - downgrade bap from master to 0.9.4
+=== 1 to downgrade ===
+Do you want to continue ? [Y/n] n
+[NOTE] Pinning command successful, but your installed packages may be out of sync.
+dan@xubuntu2:~/learn/bap/callgraph$ opam pin
+dan@xubuntu2:~/learn/bap/callgraph$ 
+==<<<<<<<<<<<<<<
+
+
+-------------------------------------------------------------------------------
+These were the opened files:
+.   callgraph.ml           1555 Tuareg           ~/learn/bap/callgraph/callgraph.ml
+    test2.2.c               236 C/l              ~/learn/bap/callgraph/test2.2.c
+    test1.c                 122 C/l              ~/learn/bap/callgraph/test1.c
+    hist.march6lesso...    2697 Fundamental      ~/learn/bap/callgraph/hist.march6lesson.other
+    hist.march6-9         30292 Fundamental      ~/learn/bap/hist.march6-9
+    hist.march6lesson       882 Fundamental      ~/learn/bap/callgraph/hist.march6lesson
+    mar06.txt              2555 Text             ~/learn/bap/mar06.txt
+    graphviz.mli          22190 Tuareg           ~/.opam/mar06/lib/ocamlgraph/graphviz.mli
+    bap_disasm.mli         4310 Tuareg           ~/.opam/mar06/lib/bap/bap_disasm.mli
+ %* *compilation*          1302 Compilation:e... 
+    bap_visitor.mli        8767 Tuareg           ~/.opam/mar06/lib/bap/bap_visitor.mli
+    bap_types.ml           9213 Tuareg           ~/.opam/mar06/lib/bap/bap_types.ml
+    bap.ml                 5326 Tuareg           ~/.opam/mar06/lib/bap/bap.ml
+    junk                    878 Fundamental      ~/learn/bap/callgraph/junk
+    *scratch*               191 Lisp Interaction 
+  * *Messages*            21901 Fundamental      
+ %  *GNU Emacs*             789 Fundamental      
+ %  *Help*                22601 Help             
+ %  *Disabled Command*      930 Help             
+  * *merlin-types*           84 Tuareg           
+ %  *Completions*           237 Completion List  

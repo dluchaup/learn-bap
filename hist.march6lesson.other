@@ -1,0 +1,97 @@
+ 1985  locate ida
+ 1986  locate idaq64
+ 1987  bap-objdump /bin/ls --use-ida
+ 1988  bap-objdump /bin/ls --use-ida -pname
+ 1989  bap-objdump /bin/ls --use-ida -pname | less
+ 1990  pwd
+ 1991  cd learn/bap
+ 1992  cd callgraph/
+ 1993  emacs callgraph.ml  &
+ 1994  emacs callgraph.ml &
+ 1995  cd learn/bap/callgraph/
+ 1996  bapbuild callgraph.plugin
+ 1997  emacs callgraph.ml  &
+ 1998  bap-objdump /bin/ls -lcallgraph
+ 1999  bap-objdump /bin/ls -lcallgraphlll
+ 2000  bap-objdump /bin/ls -lcallgraph
+ 2001  ls -altr
+ 2002  rm -rf callgraph.plugin _build/
+ 2003  ls -altr
+ 2004  git init 
+ 2005  ls -altr
+ 2006  pwd
+ 2007  ls -altr
+ 2008  git add .merlin callgraph.ml 
+ 2009  git commit -m"v1"
+ 2010  pwd
+ 2011  emacs callgraph.ml &
+ 2012  ls -altr
+ 2013  bapbuild callgraph.plugin
+ 2014  bap-objdump /bin/ls -lcallgrap
+ 2015  bapbuild callgraph.plugin
+ 2016  bap-objdump /bin/ls -lcallgrap
+ 2017  ls -altr
+ 2018  bap-objdump /bin/ls -lcallgraph
+ 2019  bap-byteweight update
+ 2020  bap-objdump /bin/ls -lcallgraph
+ 2021  git add -u
+ 2022  git commit -m"v2"
+ 2023  bapbuild callgraph.plugin
+ 2024  baptop
+ 2025  git add -u
+ 2026  git commit -m"v3"
+ 2027  bapbuild callgraph.plugin 
+ 2028  bap-objdump /bin/ls -lcallgraph
+ 2029  ls -altr
+ 2030  dotty
+ 2031  bap-objdump /bin/ls -lcallgraph
+ 2032  ls -altr
+ 2033  rm -rf _build/ callgraph.plugin 
+ 2034  ls -altr
+ 2035  bap-objdump /bin/ls -lcallgraph
+ 2036  ls -altr
+ 2037  bap-objdump /bin/ls -lcallgraph
+ 2038  ls -altr
+ 2039  bap-objdump /bin/ls -lcallgraph
+ 2040  bapbuild callgraph.plugin
+ 2041  bapbuild -pkg ocamlgrapph callgraph.plugin
+ 2042  bap-objdump /bin/ls -lcallgraph
+ 2043  ls -altr
+ 2044  dotty callgraph.dot 
+ 2045  git add -u
+ 2046  git commit -m"v4"
+ 2047  bapbuild -pkg ocamlgrapph callgraph.plugin
+ 2048  bap-objdump /bin/ls -lcallgraph
+ 2049  ls -altr
+ 2050  dotty callgraph.dot 
+ 2051  git add -u
+ 2052  git commit -m"v5"
+ 2053  bap-objdump /bin/ls -lcallgraph
+ 2054  ls -altr
+ 2055  dotty callgraph.dot 
+ 2056  git add -u
+ 2057  git commit -m"v6 better"
+ 2058  dotty callgraph.dot 
+ 2059  opam pin 
+ 2060  opam pin remove
+ 2061  opam pin removegit://github.com/BinaryAnalysisPlatform/bap
+ 2062  opam pin remove git://github.com/BinaryAnalysisPlatform/bap
+ 2063  opam pin remove github.com/BinaryAnalysisPlatform/bap
+ 2064  opam pin help
+ 2065  opam pin --help
+ 2066  opam pin
+ 2067  opam pin list
+ 2068  opam pin remove git
+ 2069  opam pin list
+ 2070  opam pin remove bap.master
+ 2071  opam pin list
+ 2072  grep source ~/inf/*
+ 2073  opam pin
+ 2074  opam pin --help
+ 2075  opam pin remove bap
+ 2076  opam pin
+ 2077  cd ..
+ 2078  mv mar06.txt ~/inf/
+ 2079  ln -s ~/inf/mar06.txt 
+ 2080  ls -altr
+ 2081  history > hist.march6-9.other
