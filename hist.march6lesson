@@ -1,0 +1,31 @@
+ 1999  eval ` opam config env `
+ 2000  opam switch
+ 2001  sudo apt-get install `opam install bap -e ubuntu `
+ 2002  opam show bap
+ 2003  baptop
+ 2004  opam show bap
+ 2005  opam install bap
+ 2006  opam install tuareg merlin ocp-indent
+ 2007  bap-objdump /bin/ls
+ 2008  which bap-objdump 
+ 2009  bap-byteweight update
+ 2010  bap-objdump /bin/ls --use-ida
+ 2011  ida
+ 2012  bap-objdump /bin/ls --use-ida
+ 2013  bap-objdump /bin/ls --use-ida=idal64
+ 2014  bap-objdump /bin/ls --use-ida=idal
+ 2015  pwd
+ 2016  cd
+ 2017  cd learn/bap
+ 2018  ls -altr
+ 2019  mkdir callgraph
+ 2020  ocamlfind list
+ 2021  bap-objdump 
+ 2022  bap-objdump --version
+ 2023  GIT=github.com/BinaryAnalyzisPlatform/bap.git
+ 2024  echo $GIT
+ 2025  opam pin add bap git://github.com/BinaryAnalysisPlatform/bap
+ 2026  bap-objdump --version
+ 2027  du -hs ~/.opam
+ 2028  du -hs ~/.opam/*
+ 2029  history > hist.march4-9
