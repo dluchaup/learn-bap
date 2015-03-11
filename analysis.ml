@@ -4,10 +4,7 @@ open Program_visitor
 
 module Callgraph = struct
   type t=project
-  type node = Int32
   type location = Int32
-  (* type info = node*node* location list  *)
-  type call = node*node* location 
 
   module V = struct
     type t = string
@@ -141,8 +138,8 @@ module Callgraph = struct
       List.iter cl
         ~f:(fun (s,d,i) -> printf "0x%xd: %s -> %s\n" i s d)
 
-  module CG = struct
-    
+ (* ********************************************************************** *)
+  module CG = struct    
     module NodeInfo = struct
       type callee2locs = location list String.Map.t
       type t = callee2locs
@@ -152,7 +149,6 @@ module Callgraph = struct
           None -> String.Map.add t ~key:callee ~data:[loc]
         | Some l -> String.Map.add (String.Map.remove t callee) ~key:callee ~data:(loc::l)
 
-      let ll_to_string (ll:location list) = "x";
     end
     
     type t = NodeInfo.t String.Map.t
