@@ -142,18 +142,25 @@ module Callgraph = struct
         ~f:(fun (s,d,i) -> printf "0x%xd: %s -> %s\n" i s d)
 
   module CG = struct
-    type t_callee2locs = location list String.Map.t
-    type t = t_callee2locs  String.Map.t
+    
+    module NodeInfo = struct
+      type callee2locs = location list String.Map.t
+      type t = callee2locs
+      let empty:t = String.Map.empty
+      let add_call t callee loc =
+        match String.Map.find t callee with
+          None -> String.Map.add t callee [loc]
+        | Some l -> String.Map.add (String.Map.remove t callee) callee (loc::l)
+    end
+    
+    type t = NodeInfo.t String.Map.t
     let empty:t = String.Map.empty
-    let add_location c2l callee loc =
-      match String.Map.find c2l callee with
-        None -> String.Map.add c2l callee [loc]
-      | Some l -> String.Map.add (String.Map.remove c2l callee) callee (loc::l)
-
+                    
     let add_call t (s,d,l) =
       match String.Map.find t s with
-        None -> String.Map.add t s (add_location String.Map.empty d l)
-      |Some c2l -> String.Map.add (String.Map.remove t s) s (add_location c2l d l);;
+        None -> String.Map.add t s (NodeInfo.add_call NodeInfo.empty d l)
+      | Some ni -> String.Map.add (String.Map.remove t s) s
+                     (NodeInfo.add_call ni d l);;
     
     (* let callee2locs
        let to_string t =
