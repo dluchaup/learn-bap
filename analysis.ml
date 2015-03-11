@@ -139,11 +139,34 @@ module Callgraph = struct
 
     let print_call_list cl =
       List.iter cl
-        ~f:(fun (s,d,i) -> printf "src=%s,dst=%s, call instr=%xd\n" s d i)
+        ~f:(fun (s,d,i) -> printf "0x%xd: %s -> %s\n" i s d)
+
+  module CG = struct
+    type t_callee2locs = location String.Map.t
+    type t = t_callee2locs  String.Map.t
+    let empty:t = String.Map.empty
+    let add_location c2l callee loc =
+      match String.Map.find c2l callee with
+        None -> String.Map.add c2l callee [loc]
+      | Some l -> String.Map.add (String.Map.remove c2l callee) callee (loc::l)
+
+    let add_call t (s,d,l) =
+      match String.Map.find t s with
+        None -> String.Map.add t s (add_location String.Map.empty d l)
+      |Some c2l -> String.Map.add (String.Map.remove t s) s (add_location c2l d l);;
+    
+    (* let callee2locs
+       let to_string t =
+    *)
+      
+    let dbg_test () =
+      print_endline "test";
+  end
 
   let main t =
     let call_list = gather_call_list t in
-    print_call_list call_list
+    print_call_list call_list;
+    (* CG.dbg_test() *)
 
 end
 
