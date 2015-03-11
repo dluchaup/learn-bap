@@ -70,13 +70,12 @@ module Callgraph = struct
                           (Addr.(to_string Memory.(min_addr mem0)))
             end) (Insn.bil insn)))
       
-  let dummy_call = ("f","g",1)
-  let call_list = ref [dummy_call]
+  let print_call_list cl =
+    List.iter cl ~f:(fun (s,d,i) -> printf "src=%s,dst=%s, call instr=%xd\n" s d i)
       
-  let print_call_list () =
-    List.iter !call_list ~f:(fun (s,d,i) -> printf "src=%s,dst=%s, call instr=%xd\n" s d i)
-      
-  let main t =
+  let gather_call_list t =
+    let dummy_call = ("f","g",1) in
+    let call_list = ref [dummy_call] in
     call_list := [];
     Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
     Table.iteri t.symbols ~f:(fun mem0 src ->
@@ -91,7 +90,11 @@ module Callgraph = struct
                         call_list := List.append !call_list
                             [(src,dst,(ok_exn ((Addr.(to_int Memory.(min_addr mem1))))))]
             end) (Insn.bil insn)));
-    print_call_list ()
+    !call_list
+      
+  let main t =
+    let call_list = gather_call_list t in
+    print_call_list call_list
       
 end
 
