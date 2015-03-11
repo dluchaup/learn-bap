@@ -4,7 +4,7 @@ open Program_visitor
 
 module Callgraph = struct
   type t=project
-  type location = word
+  (* type location = Addr.t *)
 
   module V = struct
     type t = string
@@ -116,7 +116,7 @@ module Callgraph = struct
    *)
 
     let gather_call_list t =
-      let call_list = ref ([]:(string*string*int) list) in
+      let call_list = ref ([]:(string*string*Addr.t) list) in
       call_list := [];
       Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
       Table.iteri t.symbols ~f:(fun mem0 src ->
@@ -129,18 +129,19 @@ module Callgraph = struct
                     | Some (mem2, dst) ->
                       if Addr.(Memory.min_addr mem2 = addr) then
                         call_list := List.append !call_list
-                            [(src,dst,(ok_exn ((Addr.(to_int Memory.(min_addr mem1))))))]
+                            [(src,dst, (Memory.min_addr mem1))]
               end) (Insn.bil insn)));
       !call_list
 
     let print_call_list cl =
       List.iter cl
-        ~f:(fun (s,d,i) -> printf "0x%xd: %s -> %s\n" i s d)
+        ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
+               (ok_exn ((Addr.(to_int l)))) s d)
 
  (* ********************************************************************** *)
   module CG = struct    
     module NodeInfo = struct
-      type callee2locs = location list String.Map.t
+      type callee2locs = Addr.t list String.Map.t
       type t = callee2locs
       let empty:t = String.Map.empty
       let add_call t callee loc =
@@ -148,6 +149,12 @@ module Callgraph = struct
           None -> String.Map.add t ~key:callee ~data:[loc]
         | Some l -> String.Map.add (String.Map.remove t callee) ~key:callee ~data:(loc::l)
 
+      let l_to_string ll =
+       (List.fold ~init:"[" ~f:(fun acc l -> acc^";"^(Addr.to_string l)) ll)^"]"
+
+      let to_string ?(sep="") t = 
+        (String.Map.fold t ~init:"{"
+           ~f:(fun ~key:callee ~data:lst acc -> acc^callee^(l_to_string lst)^sep))^"}"
     end
     
     type t = NodeInfo.t String.Map.t
@@ -158,11 +165,16 @@ module Callgraph = struct
         None -> String.Map.add t ~key:s ~data:(NodeInfo.add_call NodeInfo.empty d l)
       | Some ni -> String.Map.add (String.Map.remove t s)
                      ~key:s ~data:(NodeInfo.add_call ni d l);;
+
+    let to_string ?(in_sep="") ?(out_sep="") t = 
+      (String.Map.fold t ~init:"{"
+         ~f:(fun ~key:caller ~data:ni acc ->
+             acc^caller^(NodeInfo.to_string ni ~sep:in_sep)^out_sep))^"}"
+
+    let from_call_list cl =
+      List.fold cl ~init:empty
+        ~f:(fun acc y -> add_call acc y);;
     
-    (* let callee2locs
-       let to_string t =
-    *)
-      
     let dbg_test () =
       print_endline "test";
   end
