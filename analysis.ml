@@ -112,6 +112,9 @@ module Callgraph = struct
 
   let dummy_call = ("f","g",1)
   let call_list = ref [dummy_call]
+
+  let print_call_list () =
+    List.iter !call_list ~f:(fun (s,d,i) -> printf "src=%s,dst=%s, call instr=%xd\n" s d i)      
     
               
   let main t =
@@ -127,16 +130,15 @@ module Callgraph = struct
                     | Some (mem2, dst) ->
                       if Addr.(Memory.min_addr mem2 = addr) then
                         let () = 
-                          printf "src=%s,dst=%s, addr[target]=%s ..mem1[instr]=%s.. mem0[src]=%s\n" src dst
-                            (Addr.(to_string addr))
-                            (* (ok_exn (Addr.to_int addr)) *)
-                            (Addr.(to_string Memory.(min_addr mem1)))
-                            (Addr.(to_string Memory.(min_addr mem0)))
+                          printf "src=%s,dst=%s, call instr=%xd\n"
+                            src dst
+                            (ok_exn (Addr.to_int Memory.(min_addr mem1)))
                         in
                         call_list := List.append !call_list
                             [(src,dst,(ok_exn ((Addr.(to_int Memory.(min_addr mem1))))))]
-            end) (Insn.bil insn)))
-
+            end) (Insn.bil insn)));
+    (* print_call_list () *)
+      
 end
 
 let main p =
