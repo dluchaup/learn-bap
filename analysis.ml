@@ -129,15 +129,10 @@ module Callgraph = struct
                     | None -> ()
                     | Some (mem2, dst) ->
                       if Addr.(Memory.min_addr mem2 = addr) then
-                        let () = 
-                          printf "src=%s,dst=%s, call instr=%xd\n"
-                            src dst
-                            (ok_exn (Addr.to_int Memory.(min_addr mem1)))
-                        in
                         call_list := List.append !call_list
                             [(src,dst,(ok_exn ((Addr.(to_int Memory.(min_addr mem1))))))]
             end) (Insn.bil insn)));
-    (* print_call_list () *)
+    print_call_list ()
       
 end
 
