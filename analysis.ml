@@ -4,7 +4,7 @@ open Program_visitor
 
 module Callgraph = struct
   type t=project
-  type location = Int32
+  type location = word
 
   module V = struct
     type t = string
@@ -116,8 +116,7 @@ module Callgraph = struct
    *)
 
     let gather_call_list t =
-      let dummy_call = ("f","g",1) in
-      let call_list = ref [dummy_call] in
+      let call_list = ref ([]:(string*string*int) list) in
       call_list := [];
       Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
       Table.iteri t.symbols ~f:(fun mem0 src ->
