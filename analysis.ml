@@ -110,8 +110,12 @@ module Callgraph = struct
                           (Addr.(to_string Memory.(min_addr mem0)))
             end) (Insn.bil insn)))
 
-      
+  let dummy_call = ("f","g",1)
+  let call_list = ref [dummy_call]
+    
+              
   let main t =
+    call_list := [];
     Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
     Table.iteri t.symbols ~f:(fun mem0 src ->
         let mseq =  Disasm.insns_at_mem t.program mem0 in
@@ -122,11 +126,15 @@ module Callgraph = struct
                     | None -> ()
                     | Some (mem2, dst) ->
                       if Addr.(Memory.min_addr mem2 = addr) then
-                        printf "src=%s,dst=%s, addr[target]=%s ..mem1[instr]=%s.. mem0[src]=%s\n" src dst
-                          (Addr.(to_string addr))
-                          (* (ok_exn (Addr.to_int addr)) *)
-                          (Addr.(to_string Memory.(min_addr mem1)))
-                          (Addr.(to_string Memory.(min_addr mem0)))
+                        let () = 
+                          printf "src=%s,dst=%s, addr[target]=%s ..mem1[instr]=%s.. mem0[src]=%s\n" src dst
+                            (Addr.(to_string addr))
+                            (* (ok_exn (Addr.to_int addr)) *)
+                            (Addr.(to_string Memory.(min_addr mem1)))
+                            (Addr.(to_string Memory.(min_addr mem0)))
+                        in
+                        call_list := List.append !call_list
+                            [(src,dst,(ok_exn ((Addr.(to_int Memory.(min_addr mem1))))))]
             end) (Insn.bil insn)))
 
 end
