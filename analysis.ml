@@ -4,6 +4,10 @@ open Program_visitor
 
 module Callgraph = struct
   type t=project
+  type node = Int32
+  type location = Int32
+  (* type info = node*node* location list  *)
+  type call = node*node* location 
 
   module V = struct
     type t = string
@@ -106,6 +110,7 @@ module Callgraph = struct
                           (Addr.(to_string Memory.(min_addr mem0)))
             end) (Insn.bil insn)))
 
+      
   let main t =
     Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
     Table.iteri t.symbols ~f:(fun mem0 src ->
@@ -119,6 +124,7 @@ module Callgraph = struct
                       if Addr.(Memory.min_addr mem2 = addr) then
                         printf "src=%s,dst=%s, addr[target]=%s ..mem1[instr]=%s.. mem0[src]=%s\n" src dst
                           (Addr.(to_string addr))
+                          (* (ok_exn (Addr.to_int addr)) *)
                           (Addr.(to_string Memory.(min_addr mem1)))
                           (Addr.(to_string Memory.(min_addr mem0)))
             end) (Insn.bil insn)))
