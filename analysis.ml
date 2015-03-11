@@ -91,7 +91,54 @@ module Callgraph = struct
                             [(src,dst,(ok_exn ((Addr.(to_int Memory.(min_addr mem1))))))]
             end) (Insn.bil insn)));
     !call_list
-      
+
+  (*
+     Assume a program where the following calls happen
+     i1: f->g
+     ...
+     i2: f->h
+     ...
+     i3: f->g
+     .......
+     i4: h->g
+     .......
+     i5: g->g
+
+     CALL LISTS:
+     A call list is just a list of all calls:
+     (f,g,i1)
+     (f,h,i2)
+     (f,g,i3)
+     (h,g,i4)
+     (g,g,i5)
+
+     CALL GRAPH:
+     The call graph is a directed graph with an edge for every instruction
+     i:f->g. This edge goes from f to g and is labeled with i1= the call instr.
+     We represent the directed call graph as a mapping:
+     {caller1: [(callee1, [list;of;call;locations]);
+                (callee2, [list;of;call;locations])
+               ...
+              ]
+     caller2: [(callee1', [list;of;call;locations]);
+               (callee2', [list;of;call;locations])
+               ...
+              ]
+     ...
+     }
+     The call graph for the above example is:
+      {f: [ (g,[i1,i3]); (h,[i2]) ]
+       h: [ (g,[i4]) ]
+       g: [ (g,[i5]) ]
+      }
+
+     REVERSE CALL GRAPH:
+     This is data structure used for convenience.
+     It maps from callees to list of callers.
+     {g:[f;h;g]
+      h:[f]
+     }
+   *)
   let main t =
     let call_list = gather_call_list t in
     print_call_list call_list
