@@ -4,6 +4,7 @@ open Program_visitor
 
 module Callgraph = struct
   type t=project
+
   module V = struct
     type t = string
   end
@@ -47,7 +48,7 @@ module Callgraph = struct
   let default_edge_attributes _ = []
   let edge_attributes _ = []
 
-  let main t =
+  let main0 t =
     Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
     Table.iteri t.symbols ~f:(fun mem0 src ->
         Disasm.insns_at_mem t.program mem0 |>
@@ -64,7 +65,64 @@ module Callgraph = struct
                           (Addr.(to_string Memory.(min_addr mem1)))
                           (Addr.(to_string Memory.(min_addr mem0)))
             end) (Insn.bil insn)))
-                  
+
+  let main1 t =
+    Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
+    Table.iteri t.symbols ~f:(fun mem0 src ->
+        let mseq =  Disasm.insns_at_mem t.program mem0 in
+        Seq.iter mseq ~f:(fun (mem1, insn) ->
+            Bil.iter (object inherit [unit] Bil.visitor
+                method!enter_int addr () = if in_jmp then
+                    match Table.find_addr t.symbols addr with
+                    | None -> ()
+                    | Some (mem2, dst) ->
+                      if Addr.(Memory.min_addr mem2 = addr) then
+                        printf "src=%s,dst=%s, addr[target]=%s ..mem1[instr]=%s.. mem0[src]=%s\n" src dst
+                          (Addr.(to_string addr))
+                          (Addr.(to_string Memory.(min_addr mem1)))
+                          (Addr.(to_string Memory.(min_addr mem0)))
+            end) (Insn.bil insn)))
+
+  let main2 t =
+    Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
+    Table.iteri t.symbols ~f:(fun mem0 src ->
+        (* printf "mem0=%s src=%s\n" (Addr.(to_string Memory.(min_addr mem0))) src; *)
+        let mseq =  Disasm.insns_at_mem t.program mem0 in
+ (* Seq....
+ foldi: 'a Seq.t -> f:(int -> 'b -> 'a -> 'b) -> init:'b -> 'b 
+ fold : 'a Seq.t -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum)
+ iter : 'a Seq.t -> f:('a -> unit) -> unit
+ *)
+        Seq.iter mseq ~f:(fun (mem1, insn) ->
+            Bil.iter (object inherit [unit] Bil.visitor
+                method!enter_int addr () = if in_jmp then
+                    match Table.find_addr t.symbols addr with
+                    | None -> ()
+                    | Some (mem2, dst) ->
+                      if Addr.(Memory.min_addr mem2 = addr) then
+                        printf "src=%s,dst=%s, addr[target]=%s ..mem1[instr]=%s.. mem0[src]=%s\n" src dst
+                          (Addr.(to_string addr))
+                          (Addr.(to_string Memory.(min_addr mem1)))
+                          (Addr.(to_string Memory.(min_addr mem0)))
+            end) (Insn.bil insn)))
+
+  let main t =
+    Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
+    Table.iteri t.symbols ~f:(fun mem0 src ->
+        let mseq =  Disasm.insns_at_mem t.program mem0 in
+        Seq.iter mseq ~f:(fun (mem1, insn) ->
+            Bil.iter (object inherit [unit] Bil.visitor
+                method!enter_int addr () = if in_jmp then
+                    match Table.find_addr t.symbols addr with
+                    | None -> ()
+                    | Some (mem2, dst) ->
+                      if Addr.(Memory.min_addr mem2 = addr) then
+                        printf "src=%s,dst=%s, addr[target]=%s ..mem1[instr]=%s.. mem0[src]=%s\n" src dst
+                          (Addr.(to_string addr))
+                          (Addr.(to_string Memory.(min_addr mem1)))
+                          (Addr.(to_string Memory.(min_addr mem0)))
+            end) (Insn.bil insn)))
+
 end
 
 let main p =
