@@ -149,8 +149,10 @@ module Callgraph = struct
       let empty:t = String.Map.empty
       let add_call t callee loc =
         match String.Map.find t callee with
-          None -> String.Map.add t callee [loc]
-        | Some l -> String.Map.add (String.Map.remove t callee) callee (loc::l)
+          None -> String.Map.add t ~key:callee ~data:[loc]
+        | Some l -> String.Map.add (String.Map.remove t callee) ~key:callee ~data:(loc::l)
+
+      let ll_to_string (ll:location list) = "x";
     end
     
     type t = NodeInfo.t String.Map.t
@@ -158,9 +160,9 @@ module Callgraph = struct
                     
     let add_call t (s,d,l) =
       match String.Map.find t s with
-        None -> String.Map.add t s (NodeInfo.add_call NodeInfo.empty d l)
-      | Some ni -> String.Map.add (String.Map.remove t s) s
-                     (NodeInfo.add_call ni d l);;
+        None -> String.Map.add t ~key:s ~data:(NodeInfo.add_call NodeInfo.empty d l)
+      | Some ni -> String.Map.add (String.Map.remove t s)
+                     ~key:s ~data:(NodeInfo.add_call ni d l);;
     
     (* let callee2locs
        let to_string t =
