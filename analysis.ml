@@ -52,7 +52,7 @@ module Callgraph = struct
   let default_edge_attributes _ = []
   let edge_attributes _ = []
 
-  let main0 t =
+  let dbg_dmp t =
     Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
     Table.iteri t.symbols ~f:(fun mem0 src ->
         Disasm.insns_at_mem t.program mem0 |>
@@ -70,28 +70,6 @@ module Callgraph = struct
                           (Addr.(to_string Memory.(min_addr mem0)))
             end) (Insn.bil insn)))
       
-  let print_call_list cl =
-    List.iter cl ~f:(fun (s,d,i) -> printf "src=%s,dst=%s, call instr=%xd\n" s d i)
-      
-  let gather_call_list t =
-    let dummy_call = ("f","g",1) in
-    let call_list = ref [dummy_call] in
-    call_list := [];
-    Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
-    Table.iteri t.symbols ~f:(fun mem0 src ->
-        let mseq =  Disasm.insns_at_mem t.program mem0 in
-        Seq.iter mseq ~f:(fun (mem1, insn) ->
-            Bil.iter (object inherit [unit] Bil.visitor
-                method!enter_int addr () = if in_jmp then
-                    match Table.find_addr t.symbols addr with
-                    | None -> ()
-                    | Some (mem2, dst) ->
-                      if Addr.(Memory.min_addr mem2 = addr) then
-                        call_list := List.append !call_list
-                            [(src,dst,(ok_exn ((Addr.(to_int Memory.(min_addr mem1))))))]
-            end) (Insn.bil insn)));
-    !call_list
-
   (*
      Assume a program where the following calls happen
      i1: f->g
@@ -116,20 +94,20 @@ module Callgraph = struct
      The call graph is a directed graph with an edge for every instruction
      i:f->g. This edge goes from f to g and is labeled with i1= the call instr.
      We represent the directed call graph as a mapping:
-     {caller1: [(callee1, [list;of;call;locations]);
-                (callee2, [list;of;call;locations])
-               ...
-              ]
-     caller2: [(callee1', [list;of;call;locations]);
-               (callee2', [list;of;call;locations])
-               ...
-              ]
+     {caller1: [(callee1: [list;of;call;locations]);
+                (callee2: [list;of;call;locations])
+                ...
+               ]
+      caller2: [(callee1': [list;of;call;locations]);
+                (callee2': [list;of;call;locations])
+                ...
+               ]
      ...
      }
      The call graph for the above example is:
-      {f: [ (g,[i1,i3]); (h,[i2]) ]
-       h: [ (g,[i4]) ]
-       g: [ (g,[i5]) ]
+      {f: [ (g:[i1,i3]); (h:[i2]) ]
+       h: [ (g:[i4]) ]
+       g: [ (g:[i5]) ]
       }
 
      REVERSE CALL GRAPH:
@@ -139,10 +117,34 @@ module Callgraph = struct
       h:[f]
      }
    *)
+
+    let gather_call_list t =
+      let dummy_call = ("f","g",1) in
+      let call_list = ref [dummy_call] in
+      call_list := [];
+      Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
+      Table.iteri t.symbols ~f:(fun mem0 src ->
+          let mseq =  Disasm.insns_at_mem t.program mem0 in
+          Seq.iter mseq ~f:(fun (mem1, insn) ->
+              Bil.iter (object inherit [unit] Bil.visitor
+                method!enter_int addr () = if in_jmp then
+                    match Table.find_addr t.symbols addr with
+                    | None -> ()
+                    | Some (mem2, dst) ->
+                      if Addr.(Memory.min_addr mem2 = addr) then
+                        call_list := List.append !call_list
+                            [(src,dst,(ok_exn ((Addr.(to_int Memory.(min_addr mem1))))))]
+              end) (Insn.bil insn)));
+      !call_list
+
+    let print_call_list cl =
+      List.iter cl
+        ~f:(fun (s,d,i) -> printf "src=%s,dst=%s, call instr=%xd\n" s d i)
+
   let main t =
     let call_list = gather_call_list t in
     print_call_list call_list
-      
+
 end
 
 let main p =
