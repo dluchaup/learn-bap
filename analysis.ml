@@ -182,6 +182,9 @@ module Callgraph = struct
   let main t =
     let call_list = gather_call_list t in
     print_call_list call_list;
+    let cg = CG.from_call_list call_list in
+    print_endline (CG.to_string cg ~in_sep:"\n" ~out_sep:"\n\t");
+    ()
     (* CG.dbg_test() *)
 
 end
