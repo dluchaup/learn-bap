@@ -142,7 +142,7 @@ module Callgraph = struct
         ~f:(fun (s,d,i) -> printf "0x%xd: %s -> %s\n" i s d)
 
   module CG = struct
-    type t_callee2locs = location String.Map.t
+    type t_callee2locs = location list String.Map.t
     type t = t_callee2locs  String.Map.t
     let empty:t = String.Map.empty
     let add_location c2l callee loc =
