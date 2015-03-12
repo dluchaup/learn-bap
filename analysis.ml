@@ -126,7 +126,8 @@ module Analysis = struct
       String.Set.fold fset ~init:String.Set.empty
         ~f:(fun  acc f -> String.Set.union acc (get_targets t f))
         
-    (* Find a k+1-chain of sets fset=fset_0->fset_1->fset_2->...->fset_k
+    (* fset is a set of functions.
+       Find a k+1-chain of sets fset=fset_0->fset_1->fset_2->...->fset_k
        For convenience, the first element is the original one.
        So, for k calls, the chain has k+1 elements
     *)
@@ -182,16 +183,39 @@ module Analysis = struct
 
     let from_project proj = from_call_list (gather_call_list proj)
         
-(*    (* Find a k-depth DAG of calls fset=fset_1->fset_2->...->fset_k *)
+    (* Find a k-depth DAG of calls fset_1->fset_2->...->fset_k *)
+    (* We build it by using a backward and forward chain, and  *)
+    (* by taking the intersection                              *)
     let get_k_call_dag t k f =
-      if k <= 0 then []
+      if k < 0 then []
       else
-        let bkd = get_k_call_dag_set t.rcg (Set.add String.Set.empty f) in
-        if (List.length bkd) <> k then []
-        else 
-          et bkd = get_k_call_dag_set t.rcg (Set.add String.Set.empty f) in
-    ...
-      *)        
+        let bkd = LDG.get_k_call_sets t.rcg k (String.Set.add String.Set.empty f)
+        in
+        if (bkd = []) then []
+        else let () = assert ((List.length bkd) = k + 1) in
+          let rbkd = List.rev bkd in
+          let hd = List.nth_exn rbkd 0 in
+          let () = assert (not (Set.is_empty hd)) in
+          let fwd = LDG.get_k_call_sets t.cg k hd in
+          let () = assert (List.length fwd = List.length rbkd) in
+          List.map2_exn fwd rbkd ~f:Set.inter
+
+    let call_dag_to_string dag =
+      "{"^
+      (List.fold
+         dag
+         ~init:""
+         ~f:(fun acc fset ->
+             acc^"["^
+               (List.fold
+                  (List.sort ~cmp:String.compare (Set.to_list fset))(*determinize*)
+                  ~init:""
+                  ~f:( fun acc f -> acc^f^",")
+               )^"]"
+           )
+      )^"}"
+      
+        
   end
 
   let print_call_list cl =
@@ -207,7 +231,7 @@ module Analysis = struct
     print_endline (LDG.to_string ecg.rcg ~in_sep:"\n" ~out_sep:"\n\t");
     ()
     
-  let unit_test t =
+  let unit_test _t =
     let cl_example1 = [("f","g",Addr.of_int ~width:32 1);
                        ("f","h",Addr.of_int ~width:32 2);
                        ("f","g",Addr.of_int ~width:32 3);
@@ -218,12 +242,18 @@ module Analysis = struct
     print_call_list ecg.edges;
     print_endline (LDG.to_string ecg.cg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
     print_endline (LDG.to_string ecg.rcg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
+    let dag_g_0 = ECG.get_k_call_dag ecg 0 "g"  in
+    print_endline (ECG.call_dag_to_string dag_g_0);
+    let dag_g_1 = ECG.get_k_call_dag ecg 1 "g"  in
+    print_endline (ECG.call_dag_to_string dag_g_1);
+    let dag_g_2 = ECG.get_k_call_dag ecg 2 "g"  in
+    print_endline (ECG.call_dag_to_string dag_g_2);
     ()
     
 end
 
 let main p =
-  Analysis.main_test p;
+  Analysis.unit_test p;
   p
   
 let () = register main
