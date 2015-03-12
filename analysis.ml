@@ -126,15 +126,20 @@ module Analysis = struct
       String.Set.fold fset ~init:String.Set.empty
         ~f:(fun  acc f -> String.Set.union acc (get_targets t f))
         
-    (* Find a k-chain of sets fset=fset_1->fset_2->...->fset_k  *)
+    (* Find a k+1-chain of sets fset=fset_0->fset_1->fset_2->...->fset_k
+       For convenience, the first element is the original one.
+       So, for k calls, the chain has k+1 elements
+    *)
     let rec get_k_call_sets t k fset =
-      if (k <= 0) then []
+      if (k < 0 || Set.is_empty fset) then []
+      else if (k = 0) then  [fset]
       else let targets = get_set_targets t fset in
         if (Set.is_empty targets) then []
-        else if k = 1 then [targets]
-        else let rest = get_k_call_sets t (k-1) targets in
-          if (List.length rest <> k-1) then []
-          else targets::rest
+        else
+          let tail = get_k_call_sets t (k-1) targets in
+          if (tail=[]) then []
+          else let () = assert (List.length tail = k) in
+            fset::tail
   end
 
   
@@ -177,16 +182,16 @@ module Analysis = struct
 
     let from_project proj = from_call_list (gather_call_list proj)
         
-    (* Find a k-depth DAG of calls fset=fset_1->fset_2->...->fset_k *)
-    let rec get_k_call_dag t k fset =
-      if (k <= 0) then []
-      else let targets = get_set_targets t fset in
-        if (Set.is_empty targets) then []
-        else if k = 1 then [targets]
-        else let rest = get_k_call_dag_set t (k-1) targets in
-          if (List.length rest <> k-1) then []
-          else targets::rest
-               
+(*    (* Find a k-depth DAG of calls fset=fset_1->fset_2->...->fset_k *)
+    let get_k_call_dag t k f =
+      if k <= 0 then []
+      else
+        let bkd = get_k_call_dag_set t.rcg (Set.add String.Set.empty f) in
+        if (List.length bkd) <> k then []
+        else 
+          et bkd = get_k_call_dag_set t.rcg (Set.add String.Set.empty f) in
+    ...
+      *)        
   end
 
   let print_call_list cl =
