@@ -117,8 +117,6 @@ module Analysis = struct
       List.fold cl ~init:empty
         ~f:(fun acc y -> add_call acc y);;
 
-    let dbg_test () =
-      print_endline "test";
   end
 
   let main t =
@@ -129,7 +127,6 @@ module Analysis = struct
     let rcg = CG.from_call_list (List.map call_list ~f:(fun (s,d,i)->(d,s,i))) in
     print_endline (CG.to_string rcg ~in_sep:"\n" ~out_sep:"\n\t");
     ()
-    (* CG.dbg_test() *)
 
 end
 
