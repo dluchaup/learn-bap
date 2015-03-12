@@ -152,11 +152,10 @@ module Analysis = struct
 
   let main t =
     let call_list = gather_call_list t in
-    print_call_list call_list;
-    let cg = CG.from_call_list call_list in
-    print_endline (CG.to_string cg ~in_sep:"\n" ~out_sep:"\n\t");
-    let rcg = CG.from_call_list (List.map call_list ~f:(fun (s,d,i)->(d,s,i))) in
-    print_endline (CG.to_string rcg ~in_sep:"\n" ~out_sep:"\n\t");
+    let ecg = ECG.from_call_list call_list in
+    print_call_list ecg.edges;
+    print_endline (CG.to_string ecg.cg ~in_sep:"\n" ~out_sep:"\n\t");
+    print_endline (CG.to_string ecg.rcg ~in_sep:"\n" ~out_sep:"\n\t");
     ()
     
 end
