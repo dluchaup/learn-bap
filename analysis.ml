@@ -32,28 +32,28 @@ module Analysis = struct
         i:f->g.
      This edge goes from f to g and is labeled with i= the PC of the call instr.
      We represent the directed call graph as a mapping:
-     {caller1: [(callee1: [list;of;call;locations]);
+     {caller1: {(callee1: [list;of;call;locations]);
                 (callee2: [list;of;call;locations])
                 ...
-               ]
-      caller2: [(callee1': [list;of;call;locations]);
+               }
+      caller2: {(callee1': [list;of;call;locations]);
                 (callee2': [list;of;call;locations])
                 ...
-               ]
+               }
      ...
      }
      Example: the call graph for the above example is:
-      {f: [ (g:[i1,i3]); (h:[i2]) ]
-       h: [ (g:[i4]) ]
-       g: [ (g:[i5]) ]
+      {f: { (g:[i1,i3]); (h:[i2]) }
+       h: { (g:[i4]) }
+       g: { (g:[i5]) }
       }
 
      REVERSE CALL GRAPH:
-     This is data structure used for convenience.
-     It maps from callees to list of callers.
+     This is data structure used for convenience. Structurally it is the call
+     graph with the edges reversed.
      Example: the reverse call graph for the above example is:
-     {g:[f;h;g]
-      h:[f]
+     {g:{(f:[i1,i3]);(h:[i4]);(g:[i5])}
+      h:{f:[i2]}
      }
    *)
 
@@ -116,29 +116,7 @@ module Analysis = struct
     let from_call_list cl =
       List.fold cl ~init:empty
         ~f:(fun acc y -> add_call acc y);;
-    (* ****************** *)
-    (* Reverse Call Graph *)
-    type rt = string list String.Map.t
-    let rt_empty:rt = String.Map.empty
 
-    let reverse_from_call_list cl =
-      List.fold cl ~init:rt_empty
-        ~f:(fun acc (s,d,_) ->
-            let dl = match String.Map.find acc d with
-                None -> []
-              | Some l -> l
-            in
-            String.Map.add (String.Map.remove acc d) ~key:d
-              ~data:(if (List.exists dl ~f:((=) s)) then dl else s::dl)
-          )
-
-    let rt_to_string  ?(sep="") rt = 
-      (String.Map.fold rt ~init:"{"
-         ~f:(fun ~key:callee ~data:cl acc ->
-             acc^callee^("["^(List.fold cl ~init:""
-                           ~f:(fun acc c -> acc^";"^c))^"]"
-                        )^sep))^"}"
-      
     let dbg_test () =
       print_endline "test";
   end
@@ -148,8 +126,8 @@ module Analysis = struct
     print_call_list call_list;
     let cg = CG.from_call_list call_list in
     print_endline (CG.to_string cg ~in_sep:"\n" ~out_sep:"\n\t");
-    let rcg = CG.reverse_from_call_list call_list in 
-    print_endline (CG.rt_to_string rcg ~sep:"\n" );
+    let rcg = CG.from_call_list (List.map call_list ~f:(fun (s,d,i)->(d,s,i))) in
+    print_endline (CG.to_string rcg ~in_sep:"\n" ~out_sep:"\n\t");
     ()
     (* CG.dbg_test() *)
 
