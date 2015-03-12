@@ -57,29 +57,6 @@ module Analysis = struct
      }
    *)
     
-  let gather_call_list t =
-    let call_list = ref ([]:(string*string*Addr.t) list) in
-    call_list := [];
-    Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
-    Table.iteri t.symbols ~f:(fun mem0 src ->
-        let mseq =  Disasm.insns_at_mem t.program mem0 in
-        Seq.iter mseq ~f:(fun (mem1, insn) ->
-            Bil.iter (object inherit [unit] Bil.visitor
-              method!enter_int addr () = if in_jmp then
-                  match Table.find_addr t.symbols addr with
-                  | None -> ()
-                  | Some (mem2, dst) ->
-                    if Addr.(Memory.min_addr mem2 = addr) then
-                      call_list := List.append !call_list
-                          [(src,dst, (Memory.min_addr mem1))]
-            end) (Insn.bil insn)));
-    !call_list
-      
-  let print_call_list cl =
-    List.iter cl
-      ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
-             (ok_exn ((Addr.(to_int l)))) s d)
-      
   (***********************************************************************
      Labeled Directed Graph
     ******************************************************************** *)
@@ -149,7 +126,29 @@ module Analysis = struct
       }
   end
   
-
+  let gather_call_list t =
+    let call_list = ref ([]:(string*string*Addr.t) list) in
+    call_list := [];
+    Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
+    Table.iteri t.symbols ~f:(fun mem0 src ->
+        let mseq =  Disasm.insns_at_mem t.program mem0 in
+        Seq.iter mseq ~f:(fun (mem1, insn) ->
+            Bil.iter (object inherit [unit] Bil.visitor
+              method!enter_int addr () = if in_jmp then
+                  match Table.find_addr t.symbols addr with
+                  | None -> ()
+                  | Some (mem2, dst) ->
+                    if Addr.(Memory.min_addr mem2 = addr) then
+                      call_list := List.append !call_list
+                          [(src,dst, (Memory.min_addr mem1))]
+            end) (Insn.bil insn)));
+    !call_list
+      
+  let print_call_list cl =
+    List.iter cl
+      ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
+             (ok_exn ((Addr.(to_int l)))) s d)
+      
   let main t =
     let call_list = gather_call_list t in
     let ecg = ECG.from_call_list call_list in
@@ -162,8 +161,7 @@ end
 
 let main p =
   print_endline "START";
-  let module Dot = Analysis in
-  Dot.main p;
+  Analysis.main p;
   p
   
 let () = register main
