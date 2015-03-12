@@ -129,7 +129,6 @@ module Analysis = struct
   let gather_call_list t =
     let call_list = ref ([]:(string*string*Addr.t) list) in
     call_list := [];
-    Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
     Table.iteri t.symbols ~f:(fun mem0 src ->
         let mseq =  Disasm.insns_at_mem t.program mem0 in
         Seq.iter mseq ~f:(fun (mem1, insn) ->
