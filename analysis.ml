@@ -4,6 +4,7 @@ open Program_visitor
     
 module Analysis = struct
   type t=project
+
   (* type location = Addr.t *)
   (*
      Assume an executable which we want to analyze and
@@ -26,7 +27,25 @@ module Analysis = struct
      (f,g,i3)
      (h,g,i4)
      (g,g,i5)
-     
+     *)
+  let gather_call_list t =
+    let call_list = ref ([]:(string*string*Addr.t) list) in
+    call_list := [];
+    Table.iteri t.symbols ~f:(fun mem0 src ->
+        let mseq =  Disasm.insns_at_mem t.program mem0 in
+        Seq.iter mseq ~f:(fun (mem1, insn) ->
+            Bil.iter (object inherit [unit] Bil.visitor
+              method!enter_int addr () = if in_jmp then
+                  match Table.find_addr t.symbols addr with
+                  | None -> ()
+                  | Some (mem2, dst) ->
+                    if Addr.(Memory.min_addr mem2 = addr) then
+                      call_list := List.append !call_list
+                          [(src,dst, (Memory.min_addr mem1))]
+            end) (Insn.bil insn)));
+    !call_list
+      
+    (*
      CALL GRAPH:
      The call graph is a directed graph with an edge for every call instruction
         i:f->g.
@@ -124,33 +143,17 @@ module Analysis = struct
         nodes = Set.to_list (Set.union callers callees);
         roots = Set.to_list (Set.diff callers callees);
       }
+
+    let from_project proj = from_call_list (gather_call_list proj)
   end
   
-  let gather_call_list t =
-    let call_list = ref ([]:(string*string*Addr.t) list) in
-    call_list := [];
-    Table.iteri t.symbols ~f:(fun mem0 src ->
-        let mseq =  Disasm.insns_at_mem t.program mem0 in
-        Seq.iter mseq ~f:(fun (mem1, insn) ->
-            Bil.iter (object inherit [unit] Bil.visitor
-              method!enter_int addr () = if in_jmp then
-                  match Table.find_addr t.symbols addr with
-                  | None -> ()
-                  | Some (mem2, dst) ->
-                    if Addr.(Memory.min_addr mem2 = addr) then
-                      call_list := List.append !call_list
-                          [(src,dst, (Memory.min_addr mem1))]
-            end) (Insn.bil insn)));
-    !call_list
-      
   let print_call_list cl =
     List.iter cl
       ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
              (ok_exn ((Addr.(to_int l)))) s d)
       
   let main t =
-    let call_list = gather_call_list t in
-    let ecg = ECG.from_call_list call_list in
+    let ecg = ECG.from_project t in
     print_call_list ecg.edges;
     print_endline (CG.to_string ecg.cg ~in_sep:"\n" ~out_sep:"\n\t");
     print_endline (CG.to_string ecg.rcg ~in_sep:"\n" ~out_sep:"\n\t");
