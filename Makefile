@@ -5,7 +5,7 @@ analysis.plugin: analysis.ml
 
 
 test4: out.test4.32.x
-	 (diff out.test4.32.x gold.test4.32.x > diff.test4.32.x && \
+	 @(diff out.test4.32.x gold.test4.32.x > diff.test4.32.x && \
 	  echo "test4 PASSED" && rm out.test4.32.x diff.test4.32.x)\
        || echo "test4 FAILED"
 

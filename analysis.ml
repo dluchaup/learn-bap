@@ -28,9 +28,15 @@ module Analysis = struct
      (h,g,i4)
      (g,g,i5)
      *)
+  let call_compare (s1,d1,i1) (s2,d2,i2)=
+    if(      (String.compare s1 s2) <> 0) then (String.compare s1 s2)
+    else if ((String.compare d1 d2) <> 0) then (String.compare d1 d2)
+    else (Addr.compare i1 i2)
+  let determinize_call_list cl =
+    (List.sort ~cmp:(call_compare) cl)
   let gather_call_list t =
     let call_list = ref ([]:(string*string*Addr.t) list) in
-    call_list := [];
+    call_list := []; (* TBD: use fold *)
     Table.iteri t.symbols ~f:(fun mem0 src ->
         let mseq =  Disasm.insns_at_mem t.program mem0 in
         Seq.iter mseq ~f:(fun (mem1, insn) ->
@@ -43,7 +49,7 @@ module Analysis = struct
                       call_list := List.append !call_list
                           [(src,dst, (Memory.min_addr mem1))]
             end) (Insn.bil insn)));
-    !call_list
+    (determinize_call_list !call_list)
       
     (*
      CALL GRAPH:
@@ -79,16 +85,14 @@ module Analysis = struct
       (* t maps each neighbor to a list of labeled edges to that neighbor   *)
       type t = Addr.t list String.Map.t (* TBD: make Addr.t a param *)
       let empty:t = String.Map.empty
-      let add_call t callee loc =
-        match String.Map.find t callee with
-          None -> String.Map.add t ~key:callee ~data:[loc]
-        | Some l -> String.Map.add (String.Map.remove t callee) ~key:callee ~data:(loc::l)
+      let add_call t callee loc = String.Map.add t ~key:callee
+          ~data:(loc::(Option.value (String.Map.find t callee) ~default:[]))
                       
       let l_to_string ll =
         (List.fold ~init:"[" ~f:(fun acc l -> acc^";"^(Addr.to_string l)) ll)^"]"
         
       let to_string ?(sep="") t = 
-        (String.Map.fold t ~init:"{"
+        (String.Map.fold t ~init:("{"^sep)
            ~f:(fun ~key:callee ~data:lst acc -> acc^callee^(l_to_string lst)^sep))^"}"
     end
     
@@ -96,13 +100,14 @@ module Analysis = struct
     let empty:t = String.Map.empty
 
     let add_call t (s,d,l) =
-      match String.Map.find t s with
-        None -> String.Map.add t ~key:s ~data:(AdjacencyInfo.add_call AdjacencyInfo.empty d l)
-      | Some ni -> String.Map.add (String.Map.remove t s)
-                     ~key:s ~data:(AdjacencyInfo.add_call ni d l);;
-    
+      String.Map.add t ~key:s
+        ~data:(AdjacencyInfo.add_call
+                 (Option.value (String.Map.find t s)
+                    ~default: AdjacencyInfo.empty)
+                 d l);;
+
     let to_string ?(in_sep="") ?(out_sep="") t = 
-      (String.Map.fold t ~init:"{"
+      (String.Map.fold t ~init:("{"^out_sep)
          ~f:(fun ~key:caller ~data:ni acc ->
              acc^caller^(AdjacencyInfo.to_string ni ~sep:in_sep)^out_sep))^"}"
       
@@ -135,6 +140,7 @@ module Analysis = struct
     }
     
     let from_call_list call_list =
+      let call_list = determinize_call_list call_list in
       let (callers,callees) =
         (List.fold call_list
            ~init:(String.Set.empty,String.Set.empty)
@@ -150,9 +156,9 @@ module Analysis = struct
 
     let from_project proj = from_call_list (gather_call_list proj)
   end
-  
+
   let print_call_list cl =
-    List.iter cl
+    List.iter (determinize_call_list cl)
       ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
              (ok_exn ((Addr.(to_int l)))) s d)
       
@@ -161,6 +167,19 @@ module Analysis = struct
     print_call_list ecg.edges;
     print_endline (LDG.to_string ecg.cg ~in_sep:"\n" ~out_sep:"\n\t");
     print_endline (LDG.to_string ecg.rcg ~in_sep:"\n" ~out_sep:"\n\t");
+    ()
+    
+  let unit_test t =
+    let cl_example1 = [("f","g",Addr.of_int ~width:32 1);
+                       ("f","h",Addr.of_int ~width:32 2);
+                       ("f","g",Addr.of_int ~width:32 3);
+                       ("h","g",Addr.of_int ~width:32 4);
+                       ("g","g",Addr.of_int ~width:32 5)
+                      ]; in
+    let ecg = ECG.from_call_list cl_example1 in
+    print_call_list ecg.edges;
+    print_endline (LDG.to_string ecg.cg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
+    print_endline (LDG.to_string ecg.rcg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
     ()
     
 end
