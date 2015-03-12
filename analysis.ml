@@ -80,8 +80,9 @@ module Analysis = struct
       ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
              (ok_exn ((Addr.(to_int l)))) s d)
       
-  (* ********************************************************************** *)
-      
+  (***********************************************************************
+     Labeled Directed Graph
+    ******************************************************************** *)
   module CG = struct 
     module NodeInfo = struct
       type callee2locs = Addr.t list String.Map.t
@@ -117,8 +118,37 @@ module Analysis = struct
     let from_call_list cl =
       List.fold cl ~init:empty
         ~f:(fun acc y -> add_call acc y);;
-    
   end
+
+  
+  (***********************************************************************
+     Enhanced Call Graph
+    ******************************************************************** *)
+  module ECG = struct
+    type t = {
+       (* ignore functions that are neither callers or callees *)
+      nodes   : string list;
+      edges   : (string * string * Addr.t) list;
+      cg  : CG.t;
+      rcg : CG.t; (* reverse of cg *)
+      roots : string list;
+    }
+    
+    let from_call_list call_list =
+      let (callers,callees) =
+        (List.fold call_list
+           ~init:(String.Set.empty,String.Set.empty)
+           ~f:(fun (ss,sd) (s,d,_) -> ((Set.add ss s), (Set.add sd d))))
+      in
+      {
+        edges = call_list;
+        cg = CG.from_call_list call_list;
+        rcg = CG.from_call_list (List.map call_list ~f:(fun (s,d,i)->(d,s,i)));
+        nodes = Set.to_list (Set.union callers callees);
+        roots = Set.to_list (Set.diff callers callees);
+      }
+  end
+  
 
   let main t =
     let call_list = gather_call_list t in
