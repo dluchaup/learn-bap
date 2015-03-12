@@ -5,25 +5,6 @@ open Program_visitor
 module Analysis = struct
   type t=project
   (* type location = Addr.t *)
-
-  let dbg_dmp t =
-    Table.iter t.symbols ~f:(fun s -> printf "Symbol %s\n" s);
-    Table.iteri t.symbols ~f:(fun mem0 src ->
-        Disasm.insns_at_mem t.program mem0 |>
-        Seq.iter ~f:(fun (mem1, insn) ->
-            Bil.iter (object inherit [unit] Bil.visitor
-                
-                method!enter_int addr () = if in_jmp then
-                    match Table.find_addr t.symbols addr with
-                    | None -> ()
-                    | Some (mem2, dst) ->
-                      if Addr.(Memory.min_addr mem2 = addr) then
-                        printf "src=%s,dst=%s, addr[target]=%s ..mem1[instr]=%s.. mem0[src]=%s\n" src dst
-                          (Addr.(to_string addr))
-                          (Addr.(to_string Memory.(min_addr mem1)))
-                          (Addr.(to_string Memory.(min_addr mem0)))
-            end) (Insn.bil insn)))
-      
   (*
      Assume an executable which we want to analyze and
      where the following calls happen:
@@ -100,7 +81,7 @@ module Analysis = struct
                (ok_exn ((Addr.(to_int l)))) s d)
 
  (* ********************************************************************** *)
-  module CG = struct    
+  module CG = struct 
     module NodeInfo = struct
       type callee2locs = Addr.t list String.Map.t
       type t = callee2locs
