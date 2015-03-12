@@ -7,8 +7,8 @@ module Analysis = struct
 
   (* type location = Addr.t *)
   (*
-     Assume an executable which we want to analyze and
-     where the following calls happen:
+     Example1: Assume an executable which we want to analyze and where the
+               following calls happen:
      i1: f->g // i.e. There is a "call g" at address i1 inside function f
      ...
      i2: f->h
@@ -21,7 +21,7 @@ module Analysis = struct
      
      CALL LISTS:
      A call list is just a list of all calls; i.e. labeled edges in a call graph
-     Example:
+     The call list for Example1 is:
      (f,g,i1)
      (f,h,i2)
      (f,g,i3)
@@ -47,42 +47,37 @@ module Analysis = struct
       
     (*
      CALL GRAPH:
-     The call graph is a directed graph with an edge for every call instruction
+     We represent the call graph as a directed graph with a labeled edge for
+     every call instruction
         i:f->g.
      This edge goes from f to g and is labeled with i= the PC of the call instr.
-     We represent the directed call graph as a mapping:
-     {caller1: {(callee1: [list;of;call;locations]);
-                (callee2: [list;of;call;locations])
+     We represent a directed labeled call graph via a mapping:
+     {caller1: {
+                (callee1: [list;of;call;locations]);(* label info for callee1 *)
+                (callee2: [list;of;call;locations]) (* label info for callee2 *)
                 ...
-               }
-      caller2: {(callee1': [list;of;call;locations]);
-                (callee2': [list;of;call;locations])
+               }(* end of Adjacency Map for Caller1  *)
+      caller2: {
+                (callee1: [list;of;call;locations]);
+                (callee3: [list;of;call;locations])
                 ...
-               }
+               }(* end of Adjacency Map for Caller2  *)
      ...
      }
-     Example: the call graph for the above example is:
+     Example: the call graph for Example1 is:
       {f: { (g:[i1,i3]); (h:[i2]) }
        h: { (g:[i4]) }
        g: { (g:[i5]) }
       }
-     
-     REVERSE CALL GRAPH:
-     This is data structure used for convenience. Structurally it is the call
-     graph with the edges reversed.
-     Example: the reverse call graph for the above example is:
-     {g:{(f:[i1,i3]);(h:[i4]);(g:[i5])}
-      h:{f:[i2]}
-     }
    *)
     
   (***********************************************************************
      Labeled Directed Graph
     ******************************************************************** *)
-  module CG = struct 
-    module NodeInfo = struct
-      type callee2locs = Addr.t list String.Map.t
-      type t = callee2locs
+  module LDG = struct
+    module AdjacencyInfo = struct
+      (* t maps each neighbor to a list of labeled edges to that neighbor   *)
+      type t = Addr.t list String.Map.t (* TBD: make Addr.t a param *)
       let empty:t = String.Map.empty
       let add_call t callee loc =
         match String.Map.find t callee with
@@ -97,19 +92,19 @@ module Analysis = struct
            ~f:(fun ~key:callee ~data:lst acc -> acc^callee^(l_to_string lst)^sep))^"}"
     end
     
-    type t = NodeInfo.t String.Map.t
+    type t = AdjacencyInfo.t String.Map.t
     let empty:t = String.Map.empty
 
     let add_call t (s,d,l) =
       match String.Map.find t s with
-        None -> String.Map.add t ~key:s ~data:(NodeInfo.add_call NodeInfo.empty d l)
+        None -> String.Map.add t ~key:s ~data:(AdjacencyInfo.add_call AdjacencyInfo.empty d l)
       | Some ni -> String.Map.add (String.Map.remove t s)
-                     ~key:s ~data:(NodeInfo.add_call ni d l);;
+                     ~key:s ~data:(AdjacencyInfo.add_call ni d l);;
     
     let to_string ?(in_sep="") ?(out_sep="") t = 
       (String.Map.fold t ~init:"{"
          ~f:(fun ~key:caller ~data:ni acc ->
-             acc^caller^(NodeInfo.to_string ni ~sep:in_sep)^out_sep))^"}"
+             acc^caller^(AdjacencyInfo.to_string ni ~sep:in_sep)^out_sep))^"}"
       
     let from_call_list cl =
       List.fold cl ~init:empty
@@ -122,12 +117,21 @@ module Analysis = struct
     ******************************************************************** *)
   module ECG = struct
     type t = {
-       (* ignore functions that are neither callers or callees *)
-      nodes   : string list;
-      edges   : (string * string * Addr.t) list;
-      cg  : CG.t;
-      rcg : CG.t; (* reverse of cg *)
-      roots : string list;
+      (* ignore functions that are neither callers or callees               *)
+      nodes   : string list;                     (* call sources or targets *)
+      edges   : (string * string * Addr.t) list; (* directed edges in cg    *)
+      cg  : LDG.t;                               (* directed graph          *)
+      roots : string list;                       (* nodes w/o callers in cg *)
+      rcg : LDG.t;                               (* reverse of cg           *)
+      (*
+       REVERSE CALL GRAPH:
+       This data structure is used for convenience. Structurally it is the call
+       graph with the edges reversed (from callees to callers, same labels).
+       Example: the reverse call graph for the above example is:
+       {g:{(f:[i1,i3]);(h:[i4]);(g:[i5])}
+        h:{f:[i2]}
+       }
+      *)
     }
     
     let from_call_list call_list =
@@ -138,8 +142,8 @@ module Analysis = struct
       in
       {
         edges = call_list;
-        cg = CG.from_call_list call_list;
-        rcg = CG.from_call_list (List.map call_list ~f:(fun (s,d,i)->(d,s,i)));
+        cg = LDG.from_call_list call_list;
+        rcg = LDG.from_call_list (List.map call_list ~f:(fun (s,d,i)->(d,s,i)));
         nodes = Set.to_list (Set.union callers callees);
         roots = Set.to_list (Set.diff callers callees);
       }
@@ -155,8 +159,8 @@ module Analysis = struct
   let main_test t =
     let ecg = ECG.from_project t in
     print_call_list ecg.edges;
-    print_endline (CG.to_string ecg.cg ~in_sep:"\n" ~out_sep:"\n\t");
-    print_endline (CG.to_string ecg.rcg ~in_sep:"\n" ~out_sep:"\n\t");
+    print_endline (LDG.to_string ecg.cg ~in_sep:"\n" ~out_sep:"\n\t");
+    print_endline (LDG.to_string ecg.rcg ~in_sep:"\n" ~out_sep:"\n\t");
     ()
     
 end
