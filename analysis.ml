@@ -114,6 +114,27 @@ module Analysis = struct
     let from_call_list cl =
       List.fold cl ~init:empty
         ~f:(fun acc y -> add_call acc y);;
+    
+    (* Find all g such that f->g *)
+    let get_targets t f =
+      let ei = (Option.value (String.Map.find t f) ~default:String.Map.empty) in
+      String.Map.fold ei ~init:String.Set.empty
+        ~f:(fun  ~key:target ~data:_ acc -> String.Set.add acc target)
+       
+    (* Find all g such that f->g for some f in fset *)
+    let get_set_targets t fset =
+      String.Set.fold fset ~init:String.Set.empty
+        ~f:(fun  acc f -> String.Set.union acc (get_targets t f))
+        
+    (* Find a k-chain of sets fset=fset_1->fset_2->...->fset_k  *)
+    let rec get_k_call_sets t k fset =
+      if (k <= 0) then []
+      else let targets = get_set_targets t fset in
+        if (Set.is_empty targets) then []
+        else if k = 1 then [targets]
+        else let rest = get_k_call_sets t (k-1) targets in
+          if (List.length rest <> k-1) then []
+          else targets::rest
   end
 
   
@@ -155,12 +176,24 @@ module Analysis = struct
       }
 
     let from_project proj = from_call_list (gather_call_list proj)
+        
+    (* Find a k-depth DAG of calls fset=fset_1->fset_2->...->fset_k *)
+    let rec get_k_call_dag t k fset =
+      if (k <= 0) then []
+      else let targets = get_set_targets t fset in
+        if (Set.is_empty targets) then []
+        else if k = 1 then [targets]
+        else let rest = get_k_call_dag_set t (k-1) targets in
+          if (List.length rest <> k-1) then []
+          else targets::rest
+               
   end
 
   let print_call_list cl =
     List.iter (determinize_call_list cl)
       ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
              (ok_exn ((Addr.(to_int l)))) s d)
+
       
   let main_test t =
     let ecg = ECG.from_project t in
