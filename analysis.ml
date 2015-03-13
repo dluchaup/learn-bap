@@ -28,6 +28,9 @@ module Analysis = struct
      (h,g,i4)
      (g,g,i5)
      *)
+  (***********************************************************************)
+  let call_list_to_sexp = <:sexp_of<string * string * Addr.t list>>;;
+  (***********************************************************************)
   let call_compare (s1,d1,i1) (s2,d2,i2)=
     if(      (String.compare s1 s2) <> 0) then (String.compare s1 s2)
     else if ((String.compare d1 d2) <> 0) then (String.compare d1 d2)
@@ -198,8 +201,8 @@ module Analysis = struct
           let () = assert (not (Set.is_empty hd)) in
           let fwd = LDG.get_k_call_sets t.cg k hd in
           let () = assert (List.length fwd = List.length rbkd) in
-          let _hd::dag = (List.map2_exn fwd rbkd ~f:Set.inter) in
-          dag
+          match (List.map2_exn fwd rbkd ~f:Set.inter) with
+          _hd::dag -> dag | [] -> failwith "Empty" (* should not happen *)
 
     let call_dag_to_string dag =
       "{"^
