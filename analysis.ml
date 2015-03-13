@@ -202,18 +202,17 @@ module Analysis = struct
         if (bkd = []) then []
         else let () = assert ((List.length bkd) = k + 1) in
           let rbkd = List.rev bkd in
-          (* TBD *)
-          (*let () =            print_endline ("rbkd"^(Sexp.to_string ( rbkd))) in*)
           let hd = List.nth_exn rbkd 0 in
           let () = assert (not (Set.is_empty hd)) in
           let fwd = LDG.get_k_call_sets t.cg k hd in
-          (* let () = print_endline ("fwd"^(Sexp.to_string (string_list_to_sexp fwd))) in *)
           let () = assert (List.length fwd = List.length rbkd) in
           let extended_dag = List.map2_exn fwd rbkd ~f:Set.inter in
-          let dag = match (extended_dag) with
+          (*let dag = match (extended_dag) with
             _hd::tail -> tail | [] -> failwith "Empty" (* should not happen *)
-          in
+            in*)
           extended_dag
+
+
     
     
     let call_dag_to_string dag =

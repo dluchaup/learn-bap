@@ -25,7 +25,8 @@ let test_cl cl =
   List.iter ecg.nodes ~f:(fun n->
       show_k_dag 0 n;
       show_k_dag 1 n;
-      show_k_dag 2 n;);
+      show_k_dag 2 n;
+      show_k_dag 3 n);
   ()
   
 
