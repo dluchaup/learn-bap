@@ -195,7 +195,6 @@ module Analysis = struct
     let from_project proj = from_call_list (gather_call_list proj)
 
     let string_list_to_sexp = <:sexp_of<string list>>;;
-    (* type fooo = ((string, String.comparator_witness with sexp) Set.t list) with sexp;; *)
         
     (* Find a (k+1)-depth DAG of calls fset_1->fset_2->...->fset_k ->{f} *)
     (* We build it by using a backward and forward chain, and            *)
@@ -254,7 +253,7 @@ module Analysis = struct
       else
         let dag = get_k_call_dag t k f in
         List.fold (get_dag_pstrings t.cg dag) ~init:[]
-          ~f:(fun acc (_, kstring_list)-> List.append acc kstring_list)
+          ~f:(fun acc (_src, kstring_list)-> List.append acc kstring_list)
         
     let get_k_call_strings_map t k =
       List.fold t.nodes
@@ -283,8 +282,6 @@ module Analysis = struct
                )^"]"
            )
       )^"}"
-      
-        
   end
 
   (*******************)
