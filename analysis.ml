@@ -232,27 +232,3 @@ module Analysis = struct
     ()
     
 end
-
-module TestAnalysis = struct
-  open Analysis
-  (* This is dumped in a file. I know the expected output, and use diff *)
-  let unit_test _t =
-    let cl_example1 = [("f","g",Addr.of_int ~width:32 1);
-                       ("f","h",Addr.of_int ~width:32 2);
-                       ("f","g",Addr.of_int ~width:32 3);
-                       ("h","g",Addr.of_int ~width:32 4);
-                       ("g","g",Addr.of_int ~width:32 5)
-                      ]; in
-    let ecg = ECG.from_call_list cl_example1 in
-    print_call_list ecg.edges;
-    print_endline (LDG.to_string ecg.cg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
-    print_endline (LDG.to_string ecg.rcg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
-    let dag_g_0 = ECG.get_k_call_dag ecg 0 "g"  in
-    print_endline ("0:"^(ECG.call_dag_to_string dag_g_0));
-    let dag_g_1 = ECG.get_k_call_dag ecg 1 "g"  in
-    print_endline ("1"^(ECG.call_dag_to_string dag_g_1));
-    let dag_g_2 = ECG.get_k_call_dag ecg 2 "g"  in
-    print_endline ("2"^(ECG.call_dag_to_string dag_g_2));
-    ()
-end
-
