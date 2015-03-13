@@ -93,11 +93,13 @@ module Analysis = struct
           ~data:(loc::(Option.value (String.Map.find t callee) ~default:[]))
                       
       let l_to_string ll =
-        (List.fold ~init:"[" ~f:(fun acc l -> acc^";"^(Addr.to_string l)) ll)^"]"
+        (List.fold
+           ~init:"[" ~f:(fun acc l -> acc^";"^(Addr.to_string l)) ll)^"]"
         
       let to_string ?(sep="") t = 
         (String.Map.fold t ~init:("{"^sep)
-           ~f:(fun ~key:callee ~data:lst acc -> acc^callee^(l_to_string lst)^sep))^"}"
+           ~f:(fun ~key:callee ~data:lst acc ->
+               acc^callee^(l_to_string lst)^sep))^"}"
     end
     
     type t = AdjacencyInfo.t String.Map.t
@@ -202,7 +204,8 @@ module Analysis = struct
     let get_k_call_dag t k f =
       if k < 0 then []
       else
-        let bkd = LDG.get_k_call_sets t.rcg k (String.Set.add String.Set.empty f)
+        let bkd = LDG.get_k_call_sets t.rcg k (String.Set.add
+                                                 String.Set.empty f)
         in
         if (bkd = []) then []
         else let () = assert ((List.length bkd) = k + 1) in
@@ -276,7 +279,8 @@ module Analysis = struct
          ~f:(fun acc fset ->
              acc^"["^
                (List.fold
-                  (List.sort ~cmp:String.compare (Set.to_list fset))(*determinize*)
+                  (List.sort (*determinize*)
+                     ~cmp:String.compare (Set.to_list fset))
                   ~init:""
                   ~f:( fun acc f -> acc^f^",")
                )^"]"
