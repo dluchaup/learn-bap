@@ -1,0 +1,13 @@
+kstrings.ml
+ has a parameter k set to 3
+ main_analysis extracts the kstrings map and then prints it using sexp. 
+ The result is:
+ (function (kstring list))
+ where a kstring is a k-length list of call addresses
+
+ utest.ml
+  implements unit testing.
+  I dump the output to a file, and then diff against a 'gold' file which is a
+  known good version. The original gold file is checked by hand each time new
+  functionality is added.
+  

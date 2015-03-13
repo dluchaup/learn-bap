@@ -1,9 +1,7 @@
 .PHONY: build clean utest.native
 
 
-all: build test
-
-test: utest test4
+test: build utest test4
 
 build:
 	bapbuild -pkg oUnit -pkg ocamlgraph kstrings.plugin
