@@ -29,7 +29,8 @@ module Analysis = struct
      (g,g,i5)
      *)
   (***********************************************************************)
-  let call_list_to_sexp = <:sexp_of<string * string * Addr.t list>>;;
+  let call_list_to_sexp = <:sexp_of<(string * string * Addr.t) list>>;;
+  let call_list_of_sexp = <:of_sexp<(string * string * Addr.t) list>>;;
   (***********************************************************************)
   let call_compare (s1,d1,i1) (s2,d2,i2)=
     if(      (String.compare s1 s2) <> 0) then (String.compare s1 s2)
@@ -117,7 +118,8 @@ module Analysis = struct
     let from_call_list cl =
       List.fold cl ~init:empty
         ~f:(fun acc y -> add_call acc y);;
-    
+
+    (*******************)
     (* Find all g such that f->g *)
     let get_targets t f =
       let ei = (Option.value (String.Map.find t f) ~default:String.Map.empty) in
@@ -185,10 +187,13 @@ module Analysis = struct
       }
 
     let from_project proj = from_call_list (gather_call_list proj)
+
+    let string_list_to_sexp = <:sexp_of<string list>>;;
+    (* type fooo = ((string, String.comparator_witness with sexp) Set.t list) with sexp;; *)
         
-    (* Find a k-depth DAG of calls fset_1->fset_2->...->fset_k *)
-    (* We build it by using a backward and forward chain, and  *)
-    (* by taking the intersection                              *)
+    (* Find a (k+1)-depth DAG of calls fset_1->fset_2->...->fset_k ->{f} *)
+    (* We build it by using a backward and forward chain, and            *)
+    (* by taking the intersection                                        *)
     let get_k_call_dag t k f =
       if k < 0 then []
       else
@@ -197,13 +202,20 @@ module Analysis = struct
         if (bkd = []) then []
         else let () = assert ((List.length bkd) = k + 1) in
           let rbkd = List.rev bkd in
+          (* TBD *)
+          (*let () =            print_endline ("rbkd"^(Sexp.to_string ( rbkd))) in*)
           let hd = List.nth_exn rbkd 0 in
           let () = assert (not (Set.is_empty hd)) in
           let fwd = LDG.get_k_call_sets t.cg k hd in
+          (* let () = print_endline ("fwd"^(Sexp.to_string (string_list_to_sexp fwd))) in *)
           let () = assert (List.length fwd = List.length rbkd) in
-          match (List.map2_exn fwd rbkd ~f:Set.inter) with
-          _hd::dag -> dag | [] -> failwith "Empty" (* should not happen *)
-
+          let extended_dag = List.map2_exn fwd rbkd ~f:Set.inter in
+          let dag = match (extended_dag) with
+            _hd::tail -> tail | [] -> failwith "Empty" (* should not happen *)
+          in
+          extended_dag
+    
+    
     let call_dag_to_string dag =
       "{"^
       (List.fold
@@ -222,9 +234,16 @@ module Analysis = struct
         
   end
 
-  let print_call_list cl =
+  (*******************)
+  let call_list_to_string cl =
+    Sexp.to_string (call_list_to_sexp (determinize_call_list cl))
+
+  let old_print_call_list cl =
     List.iter (determinize_call_list cl)
       ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
              (ok_exn ((Addr.(to_int l)))) s d)
-
+      
+  let print_call_list cl =
+    print_endline (call_list_to_string cl)
+      
 end

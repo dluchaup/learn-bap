@@ -1,4 +1,4 @@
-.PHONY: build clean
+.PHONY: build clean utest.native
 
 
 all: build test

@@ -1,28 +1,7 @@
 File                : test4.32.x
 Arch                : i386
 Entry               : 0x80482F0:32
-0x80482add: .init_proc -> .__gmon_start__
-0x8048298d: .init_proc -> __x86.get_pc_thunk.bx
-0x8048628d: .term_proc -> __x86.get_pc_thunk.bx
-0x80483afd: __do_global_dtors_aux -> deregister_tm_clones
-0x80485ced: __libc_csu_init -> .init_proc
-0x80485b6d: __libc_csu_init -> __x86.get_pc_thunk.bx
-0x804830cd: _start -> .__libc_start_main
-0x8048544d: f1 -> f2
-0x8048554d: f1 -> f3
-0x80484fcd: f2 -> f2
-0x8048516d: f3 -> f2
-0x8048527d: f3 -> f2
-0x80483e2d: frame_dummy -> register_tm_clones
-0x80484bad: ft1 -> ft2
-0x80484cad: ft1 -> ft3
-0x8048487d: ft2 -> ft2
-0x80484a0d: ft3 -> ft2
-0x804858ad: main -> f1
-0x8048445d: uf1 -> uf2
-0x8048455d: uf1 -> uf3
-0x8048412d: uf2 -> uf2
-0x804842bd: uf3 -> uf2
+((.init_proc .__gmon_start__((z 0x80482AD)(w 32)(signed false)))(.init_proc __x86.get_pc_thunk.bx((z 0x8048298)(w 32)(signed false)))(.term_proc __x86.get_pc_thunk.bx((z 0x8048628)(w 32)(signed false)))(__do_global_dtors_aux deregister_tm_clones((z 0x80483AF)(w 32)(signed false)))(__libc_csu_init .init_proc((z 0x80485CE)(w 32)(signed false)))(__libc_csu_init __x86.get_pc_thunk.bx((z 0x80485B6)(w 32)(signed false)))(_start .__libc_start_main((z 0x804830C)(w 32)(signed false)))(f1 f2((z 0x8048544)(w 32)(signed false)))(f1 f3((z 0x8048554)(w 32)(signed false)))(f2 f2((z 0x80484FC)(w 32)(signed false)))(f3 f2((z 0x8048516)(w 32)(signed false)))(f3 f2((z 0x8048527)(w 32)(signed false)))(frame_dummy register_tm_clones((z 0x80483E2)(w 32)(signed false)))(ft1 ft2((z 0x80484BA)(w 32)(signed false)))(ft1 ft3((z 0x80484CA)(w 32)(signed false)))(ft2 ft2((z 0x8048487)(w 32)(signed false)))(ft3 ft2((z 0x80484A0)(w 32)(signed false)))(main f1((z 0x804858A)(w 32)(signed false)))(uf1 uf2((z 0x8048445)(w 32)(signed false)))(uf1 uf3((z 0x8048455)(w 32)(signed false)))(uf2 uf2((z 0x8048412)(w 32)(signed false)))(uf3 uf2((z 0x804842B)(w 32)(signed false))))
 {
 	.init_proc{
 .__gmon_start__[;0x80482AD:32]
