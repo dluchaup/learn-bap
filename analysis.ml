@@ -224,11 +224,4 @@ module Analysis = struct
       ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
              (ok_exn ((Addr.(to_int l)))) s d)
 
-  let main_test t =
-    let ecg = ECG.from_project t in
-    print_call_list ecg.edges;
-    print_endline (LDG.to_string ecg.cg ~in_sep:"\n" ~out_sep:"\n\t");
-    print_endline (LDG.to_string ecg.rcg ~in_sep:"\n" ~out_sep:"\n\t");
-    ()
-    
 end

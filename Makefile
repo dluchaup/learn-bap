@@ -1,10 +1,20 @@
-all: utest test4
+.PHONY: build clean
 
-kstrings.plugin: kstrings.ml
+
+all: build test
+
+test: utest test4
+
+build:
+	bapbuild -pkg oUnit -pkg ocamlgraph kstrings.plugin
+	bapbuild -pkg oUnit -pkg ocamlgraph utest.native
+
+
+kstrings.plugin:
 	bapbuild -pkg oUnit -pkg ocamlgraph kstrings.plugin
 
-utest.native: utest.ml
-	bapbuild -pkg oUnit -pkg ocamlgraph kstrings.plugin
+utest.native:
+	bapbuild -pkg oUnit -pkg ocamlgraph utest.native
 
 utest: out.utest.native
 	 @(diff out.utest.native gold.utest.native > diff.utest.native && \
@@ -12,7 +22,7 @@ utest: out.utest.native
        || echo "utest FAILED"
 
 out.utest.native: utest.native
-	utest.native > out.utest.native
+	./utest.native > out.utest.native
 
 
 test4: out.test4.32.x
@@ -27,4 +37,4 @@ out.test4.32.x: kstrings.plugin test4.32.x
 
 
 clean:
-	rm -rf kstrings.plugin _build
+	rm -rf kstrings.plugin utest.native _build
