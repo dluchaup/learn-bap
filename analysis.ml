@@ -103,6 +103,12 @@ module Analysis = struct
     type t = AdjacencyInfo.t String.Map.t
     let empty:t = String.Map.empty
 
+    let get_edges_exn t src dst =
+      String.Map.find_exn (String.Map.find_exn t src) dst
+    let get_edges t src dst = (* assume valid src *)
+      Option.value (String.Map.find (String.Map.find_exn t src) dst)
+        ~default:[]    
+
     let add_call t (s,d,l) =
       String.Map.add t ~key:s
         ~data:(AdjacencyInfo.add_call
@@ -212,8 +218,56 @@ module Analysis = struct
             in*)
           extended_dag
 
-
+    (* A kstring is a list [i1; i2; i3]                                 *)
+    (* A pstring is a pair (F,[kstring1;kstring2,...])                  *)
+    (* A pstring list is a list of pstrings (F,[...]) w/o repeating F's *)
+    (* This returns a pstrings list from dag                            *)
+    let rec get_dag_pstrings t dag =
+      match dag with
+      | [] -> [] (* failwith("Unreachable: should not be empty"); *)
+      | [fset] -> assert(1 = (Set.length fset));
+        let f = Set.choose_exn fset in [(f,[[]])]
+      | fset::tail ->
+        let expand_src_dst src (dst, kstring_list) =
+          let edges = LDG.get_edges t src dst  in
+          List.fold edges ~init:[]
+            ~f:(fun acc label ->
+                List.append acc
+                  (List.fold kstring_list ~init:[]
+                     ~f:(fun acc kstring -> (label::kstring)::acc))
+               )
+        in
+        let expand_src src ps_tail =
+          List.fold ps_tail ~init:[]
+            ~f:(fun acc dst_pair ->
+                List.append acc (expand_src_dst src dst_pair)
+              )
+        in
+        let ps_tail = get_dag_pstrings t tail in
+        Set.fold fset ~init:[]
+          ~f:(fun acc src ->
+              (src, (expand_src src ps_tail))::acc 
+            )
+          
+    let get_k_call_strings t k f =
+      if k = 0 then [[]]
+      else
+        let dag = get_k_call_dag t k f in
+        List.fold (get_dag_pstrings t.cg dag) ~init:[]
+          ~f:(fun acc (_, kstring_list)-> List.append acc kstring_list)
+        
+    let get_k_call_strings_map t k =
+      List.fold t.nodes
+        ~init:String.Map.empty
+        ~f:(fun acc f -> String.Map.add acc
+               ~key:f ~data:(get_k_call_strings t k f))
+        
+    let kstrings_list_to_sexp = <:sexp_of<(string * word list list) list>>;;
+    let kstrings_map_to_sexp = <:sexp_of<(word list list String.Map.t)>>;;
     
+    let get_k_call_strings_list t k =
+      Map.to_alist (get_k_call_strings_map t k)
+        
     
     let call_dag_to_string dag =
       "{"^

@@ -22,11 +22,17 @@ let test_cl cl =
     let dag = Analysis.ECG.get_k_call_dag ecg k fn  in
     print_endline (fn^":"^Int.to_string(k)^":"^(Analysis.ECG.call_dag_to_string dag))
   in
-  List.iter ecg.nodes ~f:(fun n->
-      show_k_dag 0 n;
-      show_k_dag 1 n;
-      show_k_dag 2 n;
-      show_k_dag 3 n);
+  List.iter ecg.nodes ~f:(fun f ->
+      for k = 0 to 3 do
+        show_k_dag k f;
+      done
+    );
+  for k = 0 to 3 do
+    print_endline
+      ("Table for k="^Int.to_string(k)^"=\n"^
+       Sexp.to_string (Analysis.ECG.kstrings_map_to_sexp
+                         (Analysis.ECG.get_k_call_strings_map ecg k)))
+  done;
   ()
   
 

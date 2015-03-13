@@ -81,6 +81,14 @@ f7:0:{[f7,]}
 f7:1:{[f6,][f7,]}
 f7:2:{[f5,][f6,][f7,]}
 f7:3:{[f4,][f5,][f6,][f7,]}
+Table for k=0=
+((f1(()))(f2(()))(f3(()))(f4(()))(f5(()))(f6(()))(f7(())))
+Table for k=1=
+((f1())(f2((((z 0x1)(w 32)(signed false)))))(f3((((z 0x2)(w 32)(signed false)))))(f4((((z 0x3)(w 32)(signed false)))))(f5((((z 0x4)(w 32)(signed false)))))(f6((((z 0x5)(w 32)(signed false)))))(f7((((z 0x6)(w 32)(signed false))))))
+Table for k=2=
+((f1())(f2())(f3((((z 0x1)(w 32)(signed false))((z 0x2)(w 32)(signed false)))))(f4((((z 0x2)(w 32)(signed false))((z 0x3)(w 32)(signed false)))))(f5((((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false)))))(f6((((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false)))))(f7((((z 0x5)(w 32)(signed false))((z 0x6)(w 32)(signed false))))))
+Table for k=3=
+((f1())(f2())(f3())(f4((((z 0x1)(w 32)(signed false))((z 0x2)(w 32)(signed false))((z 0x3)(w 32)(signed false)))))(f5((((z 0x2)(w 32)(signed false))((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false)))))(f6((((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false)))))(f7((((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false))((z 0x6)(w 32)(signed false))))))
 ((f1 f2((z 0x1)(w 32)(signed false)))(f2 f3((z 0x2)(w 32)(signed false)))(f2 f4((z 0x7)(w 32)(signed false)))(f3 f4((z 0x3)(w 32)(signed false)))(f3 f5((z 0x8)(w 32)(signed false)))(f4 f5((z 0x4)(w 32)(signed false)))(f5 f6((z 0x5)(w 32)(signed false)))(f6 f7((z 0x6)(w 32)(signed false))))
 f1->(f2)
 f1->2(f3 f4)
@@ -168,6 +176,14 @@ f7:0:{[f7,]}
 f7:1:{[f6,][f7,]}
 f7:2:{[f5,][f6,][f7,]}
 f7:3:{[f3,f4,][f5,][f6,][f7,]}
+Table for k=0=
+((f1(()))(f2(()))(f3(()))(f4(()))(f5(()))(f6(()))(f7(())))
+Table for k=1=
+((f1())(f2((((z 0x1)(w 32)(signed false)))))(f3((((z 0x2)(w 32)(signed false)))))(f4((((z 0x3)(w 32)(signed false)))(((z 0x7)(w 32)(signed false)))))(f5((((z 0x4)(w 32)(signed false)))(((z 0x8)(w 32)(signed false)))))(f6((((z 0x5)(w 32)(signed false)))))(f7((((z 0x6)(w 32)(signed false))))))
+Table for k=2=
+((f1())(f2())(f3((((z 0x1)(w 32)(signed false))((z 0x2)(w 32)(signed false)))))(f4((((z 0x2)(w 32)(signed false))((z 0x3)(w 32)(signed false)))(((z 0x1)(w 32)(signed false))((z 0x7)(w 32)(signed false)))))(f5((((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false)))(((z 0x7)(w 32)(signed false))((z 0x4)(w 32)(signed false)))(((z 0x2)(w 32)(signed false))((z 0x8)(w 32)(signed false)))))(f6((((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false)))(((z 0x8)(w 32)(signed false))((z 0x5)(w 32)(signed false)))))(f7((((z 0x5)(w 32)(signed false))((z 0x6)(w 32)(signed false))))))
+Table for k=3=
+((f1())(f2())(f3())(f4((((z 0x1)(w 32)(signed false))((z 0x2)(w 32)(signed false))((z 0x3)(w 32)(signed false)))))(f5((((z 0x2)(w 32)(signed false))((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false)))(((z 0x1)(w 32)(signed false))((z 0x2)(w 32)(signed false))((z 0x8)(w 32)(signed false)))(((z 0x1)(w 32)(signed false))((z 0x7)(w 32)(signed false))((z 0x4)(w 32)(signed false)))))(f6((((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false)))(((z 0x7)(w 32)(signed false))((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false)))(((z 0x2)(w 32)(signed false))((z 0x8)(w 32)(signed false))((z 0x5)(w 32)(signed false)))))(f7((((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false))((z 0x6)(w 32)(signed false)))(((z 0x8)(w 32)(signed false))((z 0x5)(w 32)(signed false))((z 0x6)(w 32)(signed false))))))
 ((f1 f2((z 0x1)(w 32)(signed false)))(f2 f3((z 0x2)(w 32)(signed false)))(f2 f4((z 0x7)(w 32)(signed false)))(f3 f4((z 0x3)(w 32)(signed false)))(f3 f5((z 0x8)(w 32)(signed false)))(f4 f5((z 0x4)(w 32)(signed false)))(f5 f6((z 0x5)(w 32)(signed false)))(f6 f3((z 0x64)(w 32)(signed false)))(f6 f7((z 0x6)(w 32)(signed false))))
 f1->(f2)
 f1->2(f3 f4)
@@ -257,3 +273,11 @@ f7:0:{[f7,]}
 f7:1:{[f6,][f7,]}
 f7:2:{[f5,][f6,][f7,]}
 f7:3:{[f3,f4,][f5,][f6,][f7,]}
+Table for k=0=
+((f1(()))(f2(()))(f3(()))(f4(()))(f5(()))(f6(()))(f7(())))
+Table for k=1=
+((f1())(f2((((z 0x1)(w 32)(signed false)))))(f3((((z 0x64)(w 32)(signed false)))(((z 0x2)(w 32)(signed false)))))(f4((((z 0x3)(w 32)(signed false)))(((z 0x7)(w 32)(signed false)))))(f5((((z 0x4)(w 32)(signed false)))(((z 0x8)(w 32)(signed false)))))(f6((((z 0x5)(w 32)(signed false)))))(f7((((z 0x6)(w 32)(signed false))))))
+Table for k=2=
+((f1())(f2())(f3((((z 0x5)(w 32)(signed false))((z 0x64)(w 32)(signed false)))(((z 0x1)(w 32)(signed false))((z 0x2)(w 32)(signed false)))))(f4((((z 0x64)(w 32)(signed false))((z 0x3)(w 32)(signed false)))(((z 0x2)(w 32)(signed false))((z 0x3)(w 32)(signed false)))(((z 0x1)(w 32)(signed false))((z 0x7)(w 32)(signed false)))))(f5((((z 0x64)(w 32)(signed false))((z 0x8)(w 32)(signed false)))(((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false)))(((z 0x7)(w 32)(signed false))((z 0x4)(w 32)(signed false)))(((z 0x2)(w 32)(signed false))((z 0x8)(w 32)(signed false)))))(f6((((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false)))(((z 0x8)(w 32)(signed false))((z 0x5)(w 32)(signed false)))))(f7((((z 0x5)(w 32)(signed false))((z 0x6)(w 32)(signed false))))))
+Table for k=3=
+((f1())(f2())(f3((((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false))((z 0x64)(w 32)(signed false)))(((z 0x8)(w 32)(signed false))((z 0x5)(w 32)(signed false))((z 0x64)(w 32)(signed false)))))(f4((((z 0x5)(w 32)(signed false))((z 0x64)(w 32)(signed false))((z 0x3)(w 32)(signed false)))(((z 0x1)(w 32)(signed false))((z 0x2)(w 32)(signed false))((z 0x3)(w 32)(signed false)))))(f5((((z 0x64)(w 32)(signed false))((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false)))(((z 0x5)(w 32)(signed false))((z 0x64)(w 32)(signed false))((z 0x8)(w 32)(signed false)))(((z 0x2)(w 32)(signed false))((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false)))(((z 0x1)(w 32)(signed false))((z 0x2)(w 32)(signed false))((z 0x8)(w 32)(signed false)))(((z 0x1)(w 32)(signed false))((z 0x7)(w 32)(signed false))((z 0x4)(w 32)(signed false)))))(f6((((z 0x64)(w 32)(signed false))((z 0x8)(w 32)(signed false))((z 0x5)(w 32)(signed false)))(((z 0x3)(w 32)(signed false))((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false)))(((z 0x7)(w 32)(signed false))((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false)))(((z 0x2)(w 32)(signed false))((z 0x8)(w 32)(signed false))((z 0x5)(w 32)(signed false)))))(f7((((z 0x4)(w 32)(signed false))((z 0x5)(w 32)(signed false))((z 0x6)(w 32)(signed false)))(((z 0x8)(w 32)(signed false))((z 0x5)(w 32)(signed false))((z 0x6)(w 32)(signed false))))))
