@@ -1,7 +1,6 @@
 open Core_kernel.Std
 open Bap.Std
 open Program_visitor
-open OUnit
     
 module Analysis = struct
   type t=project
@@ -199,7 +198,8 @@ module Analysis = struct
           let () = assert (not (Set.is_empty hd)) in
           let fwd = LDG.get_k_call_sets t.cg k hd in
           let () = assert (List.length fwd = List.length rbkd) in
-          List.map2_exn fwd rbkd ~f:Set.inter
+          let _hd::dag = (List.map2_exn fwd rbkd ~f:Set.inter) in
+          dag
 
     let call_dag_to_string dag =
       "{"^
@@ -232,6 +232,11 @@ module Analysis = struct
     print_endline (LDG.to_string ecg.rcg ~in_sep:"\n" ~out_sep:"\n\t");
     ()
     
+end
+
+module TestAnalysis = struct
+  open Analysis
+  (* This is dumped in a file. I know the expected output, and use diff *)
   let unit_test _t =
     let cl_example1 = [("f","g",Addr.of_int ~width:32 1);
                        ("f","h",Addr.of_int ~width:32 2);
@@ -244,31 +249,16 @@ module Analysis = struct
     print_endline (LDG.to_string ecg.cg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
     print_endline (LDG.to_string ecg.rcg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
     let dag_g_0 = ECG.get_k_call_dag ecg 0 "g"  in
-    print_endline (ECG.call_dag_to_string dag_g_0);
+    print_endline ("0:"^(ECG.call_dag_to_string dag_g_0));
     let dag_g_1 = ECG.get_k_call_dag ecg 1 "g"  in
-    print_endline (ECG.call_dag_to_string dag_g_1);
+    print_endline ("1"^(ECG.call_dag_to_string dag_g_1));
     let dag_g_2 = ECG.get_k_call_dag ecg 2 "g"  in
-    print_endline (ECG.call_dag_to_string dag_g_2);
+    print_endline ("2"^(ECG.call_dag_to_string dag_g_2));
     ()
-    
 end
-
-module TestAnalysis = struct
-  let test_fixture = "MyTests" >::: [
-      "add dag_g_0" >:: (fun () ->
-          assert (4 = ((+) 2 2));
-          assert (5 = ((+) 2 3));
-          assert (6 = ((+) 4 2))
-        )
-    ]
-
-  let run () = run_test_tt ~verbose:true test_fixture
-
-end
-
 
 let main p =
-  Analysis.unit_test p;
+  TestAnalysis.unit_test p;
   p
   
 let () = register main
