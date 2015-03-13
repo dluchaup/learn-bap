@@ -1,6 +1,7 @@
 open Core_kernel.Std
 open Bap.Std
 open Program_visitor
+open OUnit
     
 module Analysis = struct
   type t=project
@@ -251,6 +252,20 @@ module Analysis = struct
     ()
     
 end
+
+module TestAnalysis = struct
+  let test_fixture = "MyTests" >::: [
+      "add dag_g_0" >:: (fun () ->
+          assert (4 = ((+) 2 2));
+          assert (5 = ((+) 2 3));
+          assert (6 = ((+) 4 2))
+        )
+    ]
+
+  let run () = run_test_tt ~verbose:true test_fixture
+
+end
+
 
 let main p =
   Analysis.unit_test p;
