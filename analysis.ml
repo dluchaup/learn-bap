@@ -224,7 +224,6 @@ module Analysis = struct
       ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
              (ok_exn ((Addr.(to_int l)))) s d)
 
-      
   let main_test t =
     let ecg = ECG.from_project t in
     print_call_list ecg.edges;
@@ -257,9 +256,3 @@ module TestAnalysis = struct
     ()
 end
 
-let main p =
-  TestAnalysis.unit_test p;
-  p
-  
-let () = register main
-    
