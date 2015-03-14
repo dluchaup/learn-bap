@@ -11,3 +11,8 @@ kstrings.ml
   known good version. The original gold file is checked by hand each time new
   functionality is added.
   
+
+
+TBD:
+- refactor
+- make Addr a parameter

@@ -62,16 +62,16 @@ module Analysis = struct
         i:f->g.
      This edge goes from f to g and is labeled with i= the PC of the call instr.
      We represent a directed labeled call graph via a mapping:
-     {caller1: {
+     {caller1: {(* Adjacency Map for Caller1  *)
                 (callee1: [list;of;call;locations]);(* label info for callee1 *)
                 (callee2: [list;of;call;locations]) (* label info for callee2 *)
                 ...
-               }(* end of Adjacency Map for Caller1  *)
-      caller2: {
+               }
+      caller2: {(* Adjacency Map for Caller2  *)
                 (callee1: [list;of;call;locations]);
                 (callee3: [list;of;call;locations])
                 ...
-               }(* end of Adjacency Map for Caller2  *)
+               }
      ...
      }
      Example: the call graph for Example1 is:
