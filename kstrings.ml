@@ -5,22 +5,15 @@ open Analysis
 
 let k = 3
 
-let test t =
-  let ecg = Analysis.ECG.from_project t in
-  Analysis.print_call_list ecg.edges;
-  print_endline (Analysis.LDG.to_string ecg.cg ~in_sep:"\n" ~out_sep:"\n\t");
-  print_endline (Analysis.LDG.to_string ecg.rcg ~in_sep:"\n" ~out_sep:"\n\t");
-  ()
-
 let main_analysis t =
-  let ecg = Analysis.ECG.from_project t in
+  let map_kstrings = Analysis.get_k_call_strings_map t k in
+  let sexp_kstrings = Analysis.ECG.kstrings_map_to_sexp map_kstrings in
+  let serialized_kstrings = Sexp.to_string sexp_kstrings in
   print_endline
-    ("Table for k={"^Int.to_string(k)^"=\n"^
-     (Sexp.to_string (Analysis.ECG.kstrings_map_to_sexp
-                       (Analysis.ECG.get_k_call_strings_map ecg k)))^"}"
-    );
-    ()
-    
+    ("Table for k={"^Int.to_string(k)^"=\n"^serialized_kstrings^"}");
+  output_string (open_out "kstrings.scm") serialized_kstrings;
+  ()
+  
 let main p =
   main_analysis p;
   p

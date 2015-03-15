@@ -288,6 +288,11 @@ module Analysis = struct
       )^"}"
   end
 
+  let get_k_call_strings_map t k =
+    let ecg = ECG.from_project t in
+    ECG.get_k_call_strings_map ecg k
+
+
   (*******************)
   let call_list_to_string cl =
     Sexp.to_string (call_list_to_sexp (determinize_call_list cl))

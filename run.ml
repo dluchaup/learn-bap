@@ -42,7 +42,7 @@ let run task check input ctxt : unit =
 let dummy data = todo "test data"
 
 let suite = "BAP Fun" >::: [
-    "csforest" >::: [
+    "kstrings" >::: [
       "dummy" >:: run kstrings dummy "filename"
     ]
   ]
