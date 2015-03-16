@@ -187,6 +187,21 @@ module ECG(LabelInfo:EdgeInfo) = struct
   let get_k_call_strings_list t k =
     Map.to_alist (get_k_call_strings_map t k)
 
+  let call_dag_to_string dag =
+    "{"^
+    (List.fold
+       dag
+       ~init:""
+       ~f:(fun acc fset ->
+           acc^"["^
+           (List.fold
+              (List.sort (*determinize*)
+                 ~cmp:String.compare (Set.to_list fset))
+              ~init:""
+              ~f:( fun acc f -> acc^f^",")
+           )^"]"
+         )
+    )^"}"
 end
 
 module Analysis(LabelInfo:EdgeInfo) = struct

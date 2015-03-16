@@ -4,6 +4,9 @@ open Program_visitor
 open Analysis
 open OUnit2
 
+module Analysis = Analysis(Int)
+module LDG = LDG(Int)
+
 
 let test_cl cl =
   let ecg = Analysis.ECG.from_call_list cl in
@@ -11,16 +14,16 @@ let test_cl cl =
   let show fn =
     print_endline (fn^"->"^(Sexp.to_string
                               (String.Set.sexp_of_t
-                                 (Analysis.LDG.get_targets ecg.cg fn))));
+                                 (Analysis.ECG.LDG.get_targets ecg.cg fn))));
     print_endline (fn^"->2"^(Sexp.to_string
                                (String.Set.sexp_of_t
-                                  (Analysis.LDG.get_set_targets ecg.cg
-                                     (Analysis.LDG.get_targets ecg.cg fn)))));
+                                  (Analysis.ECG.LDG.get_set_targets ecg.cg
+                                     (Analysis.ECG.LDG.get_targets ecg.cg fn)))));
   in
   List.iter ecg.nodes ~f:show;
-  print_endline (Analysis.LDG.to_string
+  print_endline (Analysis.ECG.LDG.to_string
                    ecg.cg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
-  print_endline (Analysis.LDG.to_string
+  print_endline (Analysis.ECG.LDG.to_string
                    ecg.rcg ~in_sep:"\n\t\t" ~out_sep:"\n\t");
   let show_k_dag k fn =
     let dag = Analysis.ECG.get_k_call_dag ecg k fn  in
@@ -44,49 +47,32 @@ let test_cl cl =
 
 (* This is dumped in a file. I know the expected output, and use diff *)
 let test1 () =
-  let cl = [("f","g",Addr.of_int ~width:32 1);
-            ("f","h",Addr.of_int ~width:32 2);
-            ("f","g",Addr.of_int ~width:32 3);
-            ("h","g",Addr.of_int ~width:32 4);
-            ("g","g",Addr.of_int ~width:32 5)
+  let cl = [("f","g",Int.of_int 1);
+            ("f","h",Int.of_int 2);
+            ("f","g",Int.of_int 3);
+            ("h","g",Int.of_int 4);
+            ("g","g",Int.of_int 5)
            ]; in
   test_cl cl
 
 let test2 () =
-  let cl = [("f1","f2",Addr.of_int ~width:32 1);
-            ("f2","f3",Addr.of_int ~width:32 2);
-            ("f3","f4",Addr.of_int ~width:32 3);
-            ("f4","f5",Addr.of_int ~width:32 4);
-            ("f5","f6",Addr.of_int ~width:32 5);
-            ("f6","f7",Addr.of_int ~width:32 6);
+  let cl = [("f1","f2",Int.of_int 1);
+            ("f2","f3",Int.of_int 2);
+            ("f3","f4",Int.of_int 3);
+            ("f4","f5",Int.of_int 4);
+            ("f5","f6",Int.of_int 5);
+            ("f6","f7",Int.of_int 6);
            ];
   in
   test_cl cl;
-  let cl1 =(("f2","f4",Addr.of_int ~width:32 7)::
-            ("f3","f5",Addr.of_int ~width:32 8)::cl)
+  let cl1 =(("f2","f4",Int.of_int 7)::
+            ("f3","f5",Int.of_int 8)::cl)
   in
   test_cl cl1;
-  let cl2 = ("f6","f3",Addr.of_int ~width:32 100)::cl1 in test_cl cl2;    
+  let cl2 = ("f6","f3",Int.of_int 100)::cl1 in test_cl cl2;    
   ()
   
 let unit_test() = test2()
 
 let () = unit_test()
 
-(*
-     let call_dag_to_string dag =
-    "{"^
-    (List.fold
-       dag
-       ~init:""
-       ~f:(fun acc fset ->
-           acc^"["^
-           (List.fold
-              (List.sort (*determinize*)
-                 ~cmp:String.compare (Set.to_list fset))
-              ~init:""
-              ~f:( fun acc f -> acc^f^",")
-           )^"]"
-         )
-    )^"}"
-   *)
