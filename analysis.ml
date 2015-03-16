@@ -173,8 +173,6 @@ module ECG(LabelInfo:EdgeInfo) = struct
       roots = Set.to_list (Set.diff callers callees);
     }
 
-  let string_list_to_sexp = <:sexp_of<string list>>;;
-
   (* Find a (k+1)-depth DAG of calls fset_1->fset_2->...->fset_k ->{f} *)
   (* We build it by using a backward and forward chain, and            *)
   (* by taking the intersection                                        *)
@@ -241,8 +239,8 @@ module ECG(LabelInfo:EdgeInfo) = struct
       ~f:(fun acc f -> String.Map.add acc
              ~key:f ~data:(get_k_call_strings t k f))
 
-  let kstrings_list_to_sexp = <:sexp_of<(string * location list list) list>>;;
   let kstrings_map_to_sexp = <:sexp_of<(location list list String.Map.t)>>;;
+  let kstrings_map_of_sexp = <:of_sexp<(location list list String.Map.t)>>;;
 
   let get_k_call_strings_list t k =
     Map.to_alist (get_k_call_strings_map t k)
