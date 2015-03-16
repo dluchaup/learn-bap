@@ -88,7 +88,7 @@ end
     ******************************************************************** *)
 module ECG(LabelInfo:EdgeInfo) = struct
   module LDG = LDG(LabelInfo)
-  type location = LDG.location
+  type location = LDG.location with sexp
   type t = {
     (* ignore functions that are neither callers or callees               *)
     nodes   : string list;                     (* call sources or targets *)
@@ -181,8 +181,8 @@ module ECG(LabelInfo:EdgeInfo) = struct
       ~f:(fun acc f -> String.Map.add acc
              ~key:f ~data:(get_k_call_strings t k f))
 
-  let kstrings_list_to_sexp = <:sexp_of<(string * word list list) list>>;;
-  let kstrings_map_to_sexp = <:sexp_of<(word list list String.Map.t)>>;;
+  let kstrings_list_to_sexp = <:sexp_of<(string * location list list) list>>;;
+  let kstrings_map_to_sexp = <:sexp_of<(location list list String.Map.t)>>;;
 
   let get_k_call_strings_list t k =
     Map.to_alist (get_k_call_strings_map t k)
