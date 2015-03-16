@@ -285,5 +285,10 @@ module Analysis(LabelInfo:EdgeInfo) = struct
 
   let print_call_list cl =
     print_endline (call_list_to_string cl)
-      
+
+  
+  let get_k_call_strings_map t gather_call_list k =
+    let ecg = ECG.from_call_list (gather_call_list t) in
+    ECG.get_k_call_strings_map ecg k
+  
 end
