@@ -20,7 +20,7 @@ module LDG(LabelInfo:EdgeInfo) = struct
         
     let l_to_string ll =
       (List.fold
-         ~init:"[" ~f:(fun acc l -> acc^";"^(Addr.to_string l)) ll)^"]"
+         ~init:"[" ~f:(fun acc l -> acc^";"^(LabelInfo.to_string l)) ll)^"]"
 
     let to_string ?(sep="") t = 
       (String.Map.fold t ~init:("{"^sep)
@@ -87,7 +87,7 @@ end
      Enhanced Call Graph
     ******************************************************************** *)
 module ECG(LabelInfo:EdgeInfo) = struct
-  module LDG = LDG(Addr)
+  module LDG = LDG(LabelInfo)
   type location = LDG.location
   type t = {
     (* ignore functions that are neither callers or callees               *)
@@ -187,30 +187,14 @@ module ECG(LabelInfo:EdgeInfo) = struct
   let get_k_call_strings_list t k =
     Map.to_alist (get_k_call_strings_map t k)
 
-
-  let call_dag_to_string dag =
-    "{"^
-    (List.fold
-       dag
-       ~init:""
-       ~f:(fun acc fset ->
-           acc^"["^
-           (List.fold
-              (List.sort (*determinize*)
-                 ~cmp:String.compare (Set.to_list fset))
-              ~init:""
-              ~f:( fun acc f -> acc^f^",")
-           )^"]"
-         )
-    )^"}"
 end
 
 module Analysis(LabelInfo:EdgeInfo) = struct
-  module ECG = ECG(Addr)
+  module ECG = ECG(LabelInfo)
   
   type t=project
 
-  type location = Addr.t with sexp
+  type location = LabelInfo.t with sexp
   (***********************************************************************)
   let call_list_to_sexp = <:sexp_of<(string * string * location) list>>;;
   let call_list_of_sexp = <:of_sexp<(string * string * location) list>>;;
@@ -218,42 +202,14 @@ module Analysis(LabelInfo:EdgeInfo) = struct
   let call_compare (s1,d1,i1) (s2,d2,i2)=
     if(      (String.compare s1 s2) <> 0) then (String.compare s1 s2)
     else if ((String.compare d1 d2) <> 0) then (String.compare d1 d2)
-    else (Addr.compare i1 i2)
+    else (LabelInfo.compare i1 i2)
   let determinize_call_list cl =
     (List.sort ~cmp:(call_compare) cl)
-  let gather_call_list t =
-    let call_list = ref ([]:(string*string*location) list) in
-    call_list := []; (* TBD: use fold *)
-    Table.iteri t.symbols ~f:(fun mem0 src ->
-        let mseq =  Disasm.insns_at_mem t.program mem0 in
-        Seq.iter mseq ~f:(fun (mem1, insn) ->
-            Bil.iter (object inherit [unit] Bil.visitor
-              method!enter_int addr () = if in_jmp then
-                  match Table.find_addr t.symbols addr with
-                  | None -> ()
-                  | Some (mem2, dst) ->
-                    if Addr.(Memory.min_addr mem2 = addr) then
-                      call_list := List.append !call_list
-                          [(src,dst, (Memory.min_addr mem1))]
-            end) (Insn.bil insn)));
-    (determinize_call_list !call_list)
-
-  
-  let ecg_from_project proj = ECG.from_call_list (gather_call_list proj)
-  let get_k_call_strings_map t k =
-    let ecg = ecg_from_project t in
-    ECG.get_k_call_strings_map ecg k
-
 
   (*******************)
   let call_list_to_string cl =
     Sexp.to_string (call_list_to_sexp (determinize_call_list cl))
 
-  let old_print_call_list cl =
-    List.iter (determinize_call_list cl)
-      ~f:(fun (s,d,l) -> printf "0x%xd: %s -> %s\n"
-             (ok_exn ((Addr.(to_int l)))) s d)
-      
   let print_call_list cl =
     print_endline (call_list_to_string cl)
       

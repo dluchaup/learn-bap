@@ -73,3 +73,20 @@ let unit_test() = test2()
 
 let () = unit_test()
 
+(*
+     let call_dag_to_string dag =
+    "{"^
+    (List.fold
+       dag
+       ~init:""
+       ~f:(fun acc fset ->
+           acc^"["^
+           (List.fold
+              (List.sort (*determinize*)
+                 ~cmp:String.compare (Set.to_list fset))
+              ~init:""
+              ~f:( fun acc f -> acc^f^",")
+           )^"]"
+         )
+    )^"}"
+   *)
