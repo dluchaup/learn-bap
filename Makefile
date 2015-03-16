@@ -1,11 +1,11 @@
 .PHONY: build clean utest.native
 
 
-test: build utest test4
+test: build test4 #utest 
 
 build:
 	bapbuild -pkg oUnit -pkg ocamlgraph kstrings.plugin
-	bapbuild -pkg oUnit -pkg ocamlgraph utest.native
+	#bapbuild -pkg oUnit -pkg ocamlgraph utest.native
 
 
 kstrings.plugin:

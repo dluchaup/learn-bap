@@ -5,6 +5,8 @@ open Analysis
 
 let k = 3
 
+module Analysis = Analysis(Addr)
+
 let main_analysis t =
   let map_kstrings = Analysis.get_k_call_strings_map t k in
   let sexp_kstrings = Analysis.ECG.kstrings_map_to_sexp map_kstrings in
