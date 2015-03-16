@@ -2,13 +2,65 @@ open Core_kernel.Std
 open Bap.Std
 open Program_visitor
 
+  (*
+     Example1: Assume an executable which we want to analyze and where the
+               following calls happen:
+     i1: f->g // i.e. There is a "call g" at address i1 inside function f
+     ...
+     i2: f->h
+     ...
+     i3: f->g
+     .......
+     i4: h->g
+     .......
+     i5: g->g
+     
+     CALL LISTS:
+     A call list is just a list of all calls; i.e. labeled edges in a call graph
+     The call list for Example1 is:
+     (f,g,i1)
+     (f,h,i2)
+     (f,g,i3)
+     (h,g,i4)
+     (g,g,i5)
+
+     A call list is the list of edges in a call graph, which is a labeled
+     directed graph, where the edge information is an instruction.
+       ***********
+     CALL GRAPH:
+     We represent the call graph as a directed graph with a labeled edge for
+     every call instruction
+        i:f->g.
+     This edge goes from f to g and is labeled with i= the PC of the call instr.
+     We represent a directed labeled call graph via a mapping:
+     {caller1: {(* Adjacency Map for Caller1  *)
+                (callee1: [list;of;call;locations]);(* label info for callee1 *)
+                (callee2: [list;of;call;locations]) (* label info for callee2 *)
+                ...
+               }
+      caller2: {(* Adjacency Map for Caller2  *)
+                (callee1: [list;of;call;locations]);
+                (callee3: [list;of;call;locations])
+                ...
+               }
+     ...
+     }
+     Example: the call graph for Example1 is:
+      {f: { (g:[i1,i3]); (h:[i2]) }
+       h: { (g:[i4]) }
+       g: { (g:[i5]) }
+      }
+*)
+
 module type EdgeInfo = sig
   type t with sexp
   val compare : t -> t -> int
   val to_string : t -> string
 end
 
-    
+(***********************************************************************
+   Label Directed Graph
+    *********************************************************************)
 module LDG(LabelInfo:EdgeInfo) = struct
   type location = LabelInfo.t with sexp
   module AdjacencyInfo = struct
@@ -84,8 +136,16 @@ end
 
 
 (***********************************************************************
-     Enhanced Call Graph
-    ******************************************************************** *)
+   Enhanced Call Graph
+   An enhanced graph contains both a call graph and its reverse
+   REVERSE CALL GRAPH:
+   This data structure is used for convenience. Structurally it is the call
+   graph with the edges reversed (from callees to callers, same labels).
+   Example: the reverse call graph for the above example is:
+    {g:{(f:[i1,i3]);(h:[i4]);(g:[i5])}
+     h:{f:[i2]}
+    }
+    *********************************************************************)
 module ECG(LabelInfo:EdgeInfo) = struct
   module LDG = LDG(LabelInfo)
   type location = LDG.location with sexp
