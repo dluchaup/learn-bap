@@ -10,7 +10,6 @@ module MyVertex = struct (* see Sig.COMPARABLE *)
   type t = int let compare = compare
   let hash = Hashtbl.hash
   let equal = (=)
-  module VertexMap = Map.Make(Int);
 end;;
 
 module MyEdge = struct (* see Sig.ORDERED_TYPE_DFT *) 
