@@ -71,8 +71,28 @@ let test_g name g =
   in
   let () = G.iter_vertex show g in
   let () = print_endline "}\n <<<<<<<<<<<<<<<<<<<<<<<<<\n...\n" in
-  to_dotty name g
+  let show_k_dag k v =
+    let dag = G.get_k_call_dag g k v  in
     
+    print_endline ((G.vertex_name v)^":"^Int.to_string(k)^":"^(G.vset_list_to_string dag))
+  in
+  G.iter_vertex (fun f ->
+      for k = 0 to 5 do
+        show_k_dag k f;
+      done
+    ) g;
+  (*
+  for k = 0 to 3 do
+    print_endline
+      ("Table for k="^Int.to_string(k)^"=\n"^
+       Sexp.to_string (G.kstrings_map_to_sexp
+                         (G.get_k_call_strings_map g k)))
+  done;
+  *)
+  let _ = to_dotty name g; in ();;
+
+
+
 
 let _ = test_g "g" g
     

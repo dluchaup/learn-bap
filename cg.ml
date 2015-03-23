@@ -12,10 +12,11 @@ module MyVertex = struct (* see Sig.COMPARABLE *)
   let equal = (=)
   (* module VertexMap = Map.Make(Int) *)
   module VSet = Set.Make(Int)
+  module VMap = Map.Make(Int)
 end;;
 
 module MyEdge = struct (* see Sig.ORDERED_TYPE_DFT *) 
-  type t = string 
+  type t = string with sexp
   let compare =  String.compare
   let default = ""
 end;;
@@ -23,6 +24,9 @@ end;;
 module G = struct
   include Persistent.Digraph.ConcreteLabeled(MyVertex)(MyEdge)
   module VSet = MyVertex.VSet
+  module VMap = MyVertex.VMap
+
+  type sedge = MyEdge.t with sexp
   (** for dotty **)
   (*
   let of_raw_list proj raw_call_list = 
@@ -40,7 +44,13 @@ module G = struct
   let graph_attributes _ = []
   (* let vertex_name v = sprintf "%S" v *)
   let vertex_name v = sprintf "%S" (Int.to_string v)
-  (**************)
+
+  (*************** helper functions ***************)
+  let from_call_list cl =
+    List.fold cl ~init:empty
+      ~f:(fun acc y -> add_edge_e acc y);;
+  
+  (*************** helper functions ***************)
   let succ_set t f =  VSet.of_list (succ t f) (* Set of g s.t. f->g *)
   let pred_set t f =  VSet.of_list (pred t f) (* Set of g s.t. g->f *)
 
@@ -68,10 +78,76 @@ module G = struct
         else let () = assert (List.length tail = k) in
           fset::tail
 
+  (*************** k-strings ***************)
+  (* Find a (k+1)-depth DAG of calls fset_1->fset_2->...->fset_k ->{f} *)
+  (* We build it by using a backward and forward chain, and            *)
+  (* by taking the intersection                                        *)
+  let get_k_call_dag t k f =
+    if k < 0 then []
+    else
+      let bkd = get_k_call_sets t k (VSet.singleton f) Backward in
+      if (bkd = []) then []
+      else let () = assert ((List.length bkd) = k + 1) in
+        let rbkd = List.rev bkd in
+        let hd = List.nth_exn rbkd 0 in
+        let () = assert (not (Set.is_empty hd)) in
+        let fwd = get_k_call_sets t k hd Forward in
+        let () = assert (List.length fwd = List.length rbkd) in
+        let extended_dag = List.map2_exn fwd rbkd ~f:Set.inter in
+        (*let dag = match (extended_dag) with
+          _hd::tail -> tail | [] -> failwith "Empty" (* should not happen *)
+          in*)
+        extended_dag
+
+  (* A kstring is a list [i1; i2; i3]                                 *)
+  (* A pstring is a pair (F,[kstring1;kstring2,...])                  *)
+  (* A pstring list is a list of pstrings (F,[...]) w/o repeating F's *)
+  (* This returns a pstrings list from dag                            *)
+  let rec get_dag_pstrings t dag =
+    match dag with
+    | [] -> [] (* failwith("Unreachable: should not be empty"); *)
+    | [fset] -> assert(1 = (Set.length fset));
+      let f = Set.choose_exn fset in [(f,[[]])]
+    | fset::tail ->
+      let expand_src_dst src (dst, kstring_list) =
+        let edges = find_all_edges t src dst  in
+        List.fold edges ~init:[]
+          ~f:(fun acc label ->
+              List.append acc
+                (List.fold kstring_list ~init:[]
+                   ~f:(fun acc kstring -> (label::kstring)::acc))
+            )
+      in
+      let expand_src src ps_tail =
+        List.fold ps_tail ~init:[]
+          ~f:(fun acc dst_pair ->
+              List.append acc (expand_src_dst src dst_pair)
+            )
+      in
+      let ps_tail = get_dag_pstrings t tail in
+      Set.fold fset ~init:[]
+        ~f:(fun acc src ->
+            (src, (expand_src src ps_tail))::acc 
+          )
+
+  let get_k_call_strings t k f =
+    if k = 0 then [[]]
+    else
+      let dag = get_k_call_dag t k f in
+      List.fold (get_dag_pstrings t dag) ~init:[]
+        ~f:(fun acc (_src, kstring_list)-> List.append acc kstring_list)
+        
+  let get_k_call_strings_map t k =
+    fold_vertex (fun f acc -> VMap.add acc
+                    ~key:f ~data:(get_k_call_strings t k f)
+                )  t VMap.empty;;
+  
   (** debugging and printing **)
+  let sexp_of_edge e = sexp_of_sedge e
   let vset_list_to_sexp = <:sexp_of<(VSet.t list)>>;;
   let vset_list_to_string dag = Sexp.to_string (vset_list_to_sexp dag);;
-  let vset_to_string vs = Sexp.to_string (VSet.sexp_of_t vs)
+  let vset_to_string vs = Sexp.to_string (VSet.sexp_of_t vs);;
+  let kstrings_map_to_sexp = <:sexp_of<(edge list list VMap.t)>>;;
 end;;
 
 module DotCG = Graph.Graphviz.Dot(G);;
