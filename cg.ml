@@ -7,7 +7,7 @@ open Graph
 
 module MyVertex = struct (* see Sig.COMPARABLE *) 
 (*  type t = string let compare = String.compare *)
-  type t = int let compare = compare
+  type t = int with sexp let compare = compare
   let hash = Hashtbl.hash
   let equal = (=)
   (* module VertexMap = Map.Make(Int) *)
@@ -15,6 +15,7 @@ module MyVertex = struct (* see Sig.COMPARABLE *)
   module VMap = Map.Make(Int)
 end;;
 
+(* MyEdge would be better called MyEdgeLabel *)
 module MyEdge = struct (* see Sig.ORDERED_TYPE_DFT *) 
   type t = string with sexp
   let compare =  String.compare
@@ -144,7 +145,13 @@ module G = struct
   
   (** debugging and printing **)
   (* let sexp_of_edge e = sexp_of_sedge e *)
-  let sexp_of_edge (e:edge) = <:sexp_of<MyEdge.t>> (snd3 e);; 
+  (* let sexp_of_edge (e:edge) = <:sexp_of<MyEdge.t>> (snd3 e);; *)
+  (* let sexp_of_edge ((_v1,l,_v2):edge) = <:sexp_of<MyEdge.t>> l;;*)
+  let sexp_of_edge ((v1,l,v2):edge) =
+    let s_v1 = <:sexp_of<MyVertex.t>> v1 in 
+    let s_l = <:sexp_of<MyEdge.t>> l in 
+    let s_v2 = <:sexp_of<MyVertex.t>> v2 in
+    Sexplib.Sexp.List [s_v1; s_l; s_v2];;
   let vset_list_to_sexp = <:sexp_of<(VSet.t list)>>;;
   let vset_list_to_string dag = Sexp.to_string (vset_list_to_sexp dag);;
   let vset_to_string vs = Sexp.to_string (VSet.sexp_of_t vs);;
