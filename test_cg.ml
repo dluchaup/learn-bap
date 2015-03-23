@@ -81,14 +81,14 @@ let test_g name g =
         show_k_dag k f;
       done
     ) g;
-  (*
+  
   for k = 0 to 3 do
     print_endline
       ("Table for k="^Int.to_string(k)^"=\n"^
        Sexp.to_string (G.kstrings_map_to_sexp
                          (G.get_k_call_strings_map g k)))
   done;
-  *)
+  
   let _ = to_dotty name g; in ();;
 
 

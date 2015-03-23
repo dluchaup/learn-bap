@@ -26,7 +26,7 @@ module G = struct
   module VSet = MyVertex.VSet
   module VMap = MyVertex.VMap
 
-  type sedge = MyEdge.t with sexp
+  (* type sedge = MyEdge.t with sexp*)
   (** for dotty **)
   (*
   let of_raw_list proj raw_call_list = 
@@ -143,7 +143,8 @@ module G = struct
                 )  t VMap.empty;;
   
   (** debugging and printing **)
-  let sexp_of_edge e = sexp_of_sedge e
+  (* let sexp_of_edge e = sexp_of_sedge e *)
+  let sexp_of_edge (e:edge) = <:sexp_of<MyEdge.t>> (snd3 e);; 
   let vset_list_to_sexp = <:sexp_of<(VSet.t list)>>;;
   let vset_list_to_string dag = Sexp.to_string (vset_list_to_sexp dag);;
   let vset_to_string vs = Sexp.to_string (VSet.sexp_of_t vs);;
