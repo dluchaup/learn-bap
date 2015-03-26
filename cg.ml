@@ -6,20 +6,26 @@ open Graph
 
 
 module MyVertex = struct (* see Sig.COMPARABLE *) 
-(*  type t = string let compare = String.compare *)
-  type t = int with sexp let compare = compare
+  (* type t = int with sexp let compare = compare
+     module VSet = Set.Make(Int) module VMap = Map.Make(Int)
+     let to_string t = sprintf "%S" (Int.to_string t)
+  *)
+  type t = string with sexp let compare = String.compare
+  module VSet = Set.Make(String) module VMap = Map.Make(String)
   let hash = Hashtbl.hash
   let equal = (=)
-  (* module VertexMap = Map.Make(Int) *)
-  module VSet = Set.Make(Int)
-  module VMap = Map.Make(Int)
+  let to_string t = t
 end;;
 
 (* MyEdge would be better called MyEdgeLabel *)
 module MyEdge = struct (* see Sig.ORDERED_TYPE_DFT *) 
-  type t = string with sexp
-  let compare =  String.compare
-  let default = ""
+  (* type t = string with sexp let compare =  String.compare let default = ""
+     let to_string t = t
+  *)
+  let compare =  Addr.compare
+  type t = Addr.t with sexp 
+  let default = Addr.of_int32 0x0dl;; (*Addr.zero 32*)
+  let to_string t = Addr.to_string t
 end;;
 
 module G = struct
@@ -41,10 +47,10 @@ module G = struct
   let vertex_attributes _ = []
   let get_subgraph  _ = None
   let default_edge_attributes _ = []
-  let edge_attributes (_,l,_) = [`Label l] (* may want to use sprintf *)
+  let edge_attributes (_,l,_) = [`Label (MyEdge.to_string l)] (* may want to use sprintf *)
   let graph_attributes _ = []
   (* let vertex_name v = sprintf "%S" v *)
-  let vertex_name v = sprintf "%S" (Int.to_string v)
+  let vertex_name v = MyVertex.to_string v
 
   (*************** helper functions ***************)
   let from_call_list cl =
@@ -147,11 +153,13 @@ module G = struct
   (* let sexp_of_edge e = sexp_of_sedge e *)
   (* let sexp_of_edge (e:edge) = <:sexp_of<MyEdge.t>> (snd3 e);; *)
   (* let sexp_of_edge ((_v1,l,_v2):edge) = <:sexp_of<MyEdge.t>> l;;*)
-  let sexp_of_edge ((v1,l,v2):edge) =
+  let snd_sexp_of_edge ((_v1,l,_v2):edge) = <:sexp_of<MyEdge.t>> l;;
+  let full_sexp_of_edge ((v1,l,v2):edge) =
     let s_v1 = <:sexp_of<MyVertex.t>> v1 in 
     let s_l = <:sexp_of<MyEdge.t>> l in 
     let s_v2 = <:sexp_of<MyVertex.t>> v2 in
     Sexplib.Sexp.List [s_v1; s_l; s_v2];;
+  let sexp_of_edge = snd_sexp_of_edge;; (* full_sexp_of_edge;; *)
   let vset_list_to_sexp = <:sexp_of<(VSet.t list)>>;;
   let vset_list_to_string dag = Sexp.to_string (vset_list_to_sexp dag);;
   let vset_to_string vs = Sexp.to_string (VSet.sexp_of_t vs);;
